@@ -4,7 +4,6 @@ services:
     runtime: docker
     region: oregon
     plan: free
-    branch: main
     rootDir: backend
     dockerfilePath: ./Dockerfile
     dockerContext: ./
@@ -17,3 +16,15 @@ services:
       name: grocery-data
       mountPath: /app/data
       sizeGB: 1
+
+  - type: web
+    name: grocery-price-comparison-frontend
+    env: node
+    region: oregon
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://grocery-price-comparison-api.onrender.com
