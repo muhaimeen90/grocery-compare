@@ -3,15 +3,13 @@ FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 # Set working directory
 WORKDIR /app
 
+# Set Playwright to use pre-installed browsers
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 # Copy requirements and install dependencies
 COPY requirements.txt .
-
-# Install dependencies with playwright environment variable set
-RUN PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pip install --no-cache-dir --upgrade pip && \
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pip install --no-cache-dir -r requirements.txt
-
-# Set runtime environment variables
-ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .

@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     # Application
     APP_NAME: str = "Grocery Price Comparison API"
     APP_VERSION: str = "1.0.0"
-    DEBUG: bool = True
+    DEBUG: bool = False  # Set to False in production
     
     # Database
     DATABASE_URL: str = "sqlite:///./data/grocery_prices.db"
@@ -31,7 +31,6 @@ class Settings(BaseSettings):
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATA_DIR: Path = BASE_DIR / "data"
-    CSV_DIR: Path = BASE_DIR.parent / "week 2"
     
     class Config:
         env_file = ".env"
