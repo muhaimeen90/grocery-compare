@@ -3,18 +3,14 @@ FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 # Set working directory
 WORKDIR /app
 
-# Set Playwright environment variables
+# Use browsers bundled with the Playwright base image
 ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
-# Copy requirements and install dependencies
-COPY requirements.txt .
-
+# Install Python dependencies (Playwright already provided by base image)
+COPY requirements-docker.txt ./requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && \
-    grep -v "playwright" requirements.txt > requirements-temp.txt && \
-    pip install --no-cache-dir -r requirements-temp.txt && \
-    rm requirements-temp.txt && \
-    (pip install --no-cache-dir playwright==1.40.0 || echo "Post-install failed but continuing...") && \
-    python -c "from playwright.sync_api import sync_playwright; print('Playwright imported successfully')"
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY . .
