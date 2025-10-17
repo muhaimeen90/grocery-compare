@@ -3,6 +3,10 @@ FROM mcr.microsoft.com/playwright/python:v1.40.0-jammy
 # Set working directory
 WORKDIR /app
 
+# Set environment variables to skip playwright post-install
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+
 # Copy requirements and install dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
