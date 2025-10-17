@@ -1,7 +1,7 @@
 services:
   - type: web
     name: grocery-price-comparison-api
-    runtime: docker
+    env: docker
     region: oregon
     plan: free
     rootDir: backend
