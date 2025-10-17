@@ -13,32 +13,43 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Manually install Playwright Python package without triggering postinstall scripts
-RUN pip download --no-deps playwright==1.40.0 && \
+RUN mkdir -p /tmp/playwright-wheel && \
+    pip download --no-deps --dest /tmp/playwright-wheel playwright==1.40.0 && \
     python - <<'PY'
-import sys
-from pathlib import Path
 import zipfile
 import shutil
+from pathlib import Path
+import sysconfig
 
-wheel_path = next(Path('.').glob('playwright-*.whl'))
-extract_dir = Path('/tmp/playwright')
-extract_dir.mkdir(parents=True, exist_ok=True)
+wheel_dir = Path('/tmp/playwright-wheel')
+wheel_matches = sorted(wheel_dir.glob('playwright-*.whl'))
+if not wheel_matches:
+    raise RuntimeError('Playwright wheel not downloaded')
+wheel_path = wheel_matches[0]
+
+extract_dir = Path('/tmp/playwright-extracted')
+if extract_dir.exists():
+    shutil.rmtree(extract_dir)
+extract_dir.mkdir(parents=True)
+
 with zipfile.ZipFile(wheel_path) as zf:
     zf.extractall(extract_dir)
 
-site_packages = next(Path(p) for p in sys.path if 'site-packages' in p)
-for name in ['playwright', 'playwright-1.40.0.dist-info']:
-    src = extract_dir / name
-    dest = site_packages / name
+site_packages = Path(sysconfig.get_paths()["purelib"])
+for item in extract_dir.iterdir():
+    dest = site_packages / item.name
     if dest.exists():
-        shutil.rmtree(dest)
-    if src.is_dir():
-        shutil.copytree(src, dest)
+        if dest.is_file() or dest.is_symlink():
+            dest.unlink()
+        else:
+            shutil.rmtree(dest)
+    if item.is_file():
+        shutil.copy2(item, dest)
     else:
-        shutil.copy2(src, dest)
+        shutil.copytree(item, dest)
 PY
 
-RUN rm -rf /tmp/playwright playwright-*.whl
+RUN rm -rf /tmp/playwright-wheel /tmp/playwright-extracted
 
 RUN python -c "import playwright; print('Playwright installed successfully')"
 
