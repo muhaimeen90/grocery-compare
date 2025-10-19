@@ -42,7 +42,6 @@ WebApp/
 │   │   ├── schemas.py      # Pydantic schemas
 │   │   └── main.py         # FastAPI app
 │   ├── data/               # SQLite database
-│   ├── migrate_csv.py      # CSV migration script
 │   ├── requirements.txt
 │   └── README.md
 │
@@ -92,15 +91,7 @@ pip install -r requirements.txt
 playwright install
 ```
 
-4. Run CSV migration (one-time setup):
-
-```bash
-python migrate_csv.py
-```
-
-This will create the SQLite database and import all products from CSV files.
-
-5. Start the backend server:
+4. Start the backend server:
 
 ```bash
 uvicorn app.main:app --reload --port 8000
@@ -310,10 +301,6 @@ NEXT_PUBLIC_API_URL=http://localhost:8000
 - Check Node version: `node --version` (must be 18+)
 - Clear cache: `rm -rf .next node_modules && npm install`
 - Check port 3000 is available
-
-### Database is empty
-- Run migration: `python migrate_csv.py`
-- Check CSV files exist in `week 2/` directory
 
 ### CORS errors
 - Add frontend URL to backend `config.py` CORS_ORIGINS

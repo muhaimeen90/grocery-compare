@@ -22,7 +22,6 @@ Located in: `/backend/`
   - Product listing with filters (`api/products.py`)
   - Live price scraping (`api/scraping.py`)
 - ✅ Service layer for business logic (`services/scraper_service.py`)
-- ✅ CSV to SQLite migration tool (`migrate_csv.py`)
 - ✅ Utility functions (`utils/`)
 - ✅ Configuration management (`config.py`, `.env.example`)
 - ✅ Complete documentation (`README.md`)
@@ -101,7 +100,6 @@ Located in: `/frontend/`
 - ✅ `setup.sh` - Automated setup (backend + frontend)
 - ✅ `start.sh` - Start both servers with one command
 - ✅ `test_api.py` - API testing script
-- ✅ `migrate_csv.py` - Database migration script
 
 ---
 
@@ -141,7 +139,7 @@ Located in: `/frontend/`
 
 - ✅ 3 Store support (IGA, Woolworths, Coles)
 - ✅ 40+ Product categories
-- ✅ 15,000+ Products (from CSV migration)
+- ✅ 15,000+ Products (pre-seeded SQLite snapshot)
 - ✅ Full-text search
 - ✅ Brand filtering
 - ✅ Price sorting
@@ -235,15 +233,13 @@ WebApp/
 │   │   ├── services/             # Business logic
 │   │   │   └── scraper_service.py
 │   │   ├── utils/                # Utilities
-│   │   │   ├── csv_importer.py
 │   │   │   └── price_parser.py
 │   │   ├── models.py             # Database models
 │   │   ├── schemas.py            # Pydantic schemas
 │   │   ├── database.py           # DB setup
 │   │   ├── config.py             # Configuration
 │   │   └── main.py               # FastAPI app
-│   ├── data/                     # SQLite database
-│   ├── migrate_csv.py            # Migration script
+│   ├── data/                     # Pre-seeded SQLite database
 │   ├── requirements.txt          # Dependencies
 │   ├── .env.example              # Config template
 │   ├── .gitignore

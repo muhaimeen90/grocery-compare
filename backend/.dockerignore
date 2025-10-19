@@ -15,6 +15,7 @@ env/
 
 # Database (don't include in Docker image)
 *.db
+!data/grocery_prices.db
 *.sqlite
 *.sqlite3
 

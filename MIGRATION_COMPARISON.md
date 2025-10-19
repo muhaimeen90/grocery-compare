@@ -116,14 +116,12 @@ backend/
 │   ├── services/
 │   │   └── scraper_service.py # ~80 lines
 │   ├── utils/
-│   │   ├── csv_importer.py  # ~180 lines
 │   │   └── price_parser.py  # ~30 lines
 │   ├── models.py            # ~30 lines
 │   ├── schemas.py           # ~60 lines
 │   ├── database.py          # ~35 lines
 │   ├── config.py            # ~35 lines
 │   └── main.py              # ~55 lines
-├── migrate_csv.py           # ~80 lines
 └── requirements.txt
 
 frontend/

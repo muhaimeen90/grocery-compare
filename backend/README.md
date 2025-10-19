@@ -44,14 +44,6 @@ playwright install
 cp .env.example .env
 ```
 
-5. Run CSV migration (one-time setup):
-
-```bash
-python migrate_csv.py
-```
-
-This will create the SQLite database and import all CSV data from the `week 2` folder.
-
 ### Running the Server
 
 ```bash
@@ -100,11 +92,9 @@ backend/
 │   ├── services/
 │   │   └── scraper_service.py  # Scraper integration
 │   └── utils/
-│       ├── csv_importer.py  # CSV migration
 │       └── price_parser.py  # Price utilities
 ├── data/
 │   └── grocery_prices.db    # SQLite database
-├── migrate_csv.py           # Migration script
 ├── requirements.txt
 └── README.md
 ```
@@ -135,16 +125,6 @@ CREATE TABLE products (
 1. Create route in `app/api/`
 2. Add router to `app/main.py`
 3. Test with interactive docs at `/docs`
-
-### Database Changes
-
-If you modify models:
-
-```bash
-# Drop and recreate (development only)
-rm data/grocery_prices.db
-python migrate_csv.py
-```
 
 ## Notes
 

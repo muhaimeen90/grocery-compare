@@ -100,7 +100,6 @@ playwright install
 ```bash
 cp .env.example .env
 ```
-
 6. **Run database migration:**
 ```bash
 python migrate_csv.py
@@ -228,9 +227,7 @@ playwright install
 **Problem:** `Database file not found`
 
 **Solution:**
-```bash
-python migrate_csv.py
-```
+- Ensure `backend/data/grocery_prices.db` exists (pull latest repository or request the seeded snapshot if missing)
 
 ---
 
@@ -298,10 +295,7 @@ kill -9 <PID>
 **Problem:** No products showing up
 
 **Solution:**
-```bash
-cd backend
-python migrate_csv.py
-```
+- Confirm `backend/data/grocery_prices.db` exists and contains data (check file size > 0)
 
 ---
 
