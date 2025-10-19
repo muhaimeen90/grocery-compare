@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATA_DIR: Path = BASE_DIR / "data"
+    CSV_DIR: Path = BASE_DIR.parent / "week 2"
     
     class Config:
         env_file = ".env"
