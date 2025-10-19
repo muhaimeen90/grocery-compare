@@ -13,6 +13,7 @@ ENV/
 *.db
 *.db-journal
 data/*.db
+!data/grocery_prices.db
 
 # Environment variables
 .env
