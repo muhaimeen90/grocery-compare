@@ -17,51 +17,65 @@ class VectorSearchService:
     
     def __init__(self):
         """Initialize the vector search service"""
+        self.pc = None
+        self.index = None
         self.model = None
         self.bm25_encoder = None
-        self.pinecone_client = None
-        self.index = None
-        self.index_name = "grocery-hybrid"
-        self._initialize()
+        self._initialized = False
+        self._init_error = None
     
-    def _initialize(self):
+    def initialize(self):
         """Initialize Pinecone, embedding model, and BM25 encoder"""
+        if self._initialized:
+            return
+        
         try:
-            print("🤖 Loading embedding model (dense vectors)...")
-            # Initialize embedding model for dense vectors
-            self.model = SentenceTransformer('all-MiniLM-L6-v2')
-            print("✅ Dense model loaded")
+            import os
+            from dotenv import load_dotenv
+            from pinecone import Pinecone
+            from sentence_transformers import SentenceTransformer
+            from pinecone_text.sparse import BM25Encoder
+            from pathlib import Path
             
-            # Initialize BM25 encoder for sparse vectors
-            print("🔤 Loading BM25 encoder (sparse vectors)...")
-            bm25_path = Path(__file__).parent.parent.parent / "bm25_params.json"
-            if bm25_path.exists():
-                self.bm25_encoder = BM25Encoder.default()
-                self.bm25_encoder.load(str(bm25_path))
-                print("✅ BM25 encoder loaded from saved parameters")
-            else:
-                print("⚠️  BM25 parameters not found - using default encoder")
-                print("   Run migration script first to generate bm25_params.json")
-                self.bm25_encoder = BM25Encoder.default()
+            load_dotenv()
+            
+            # Get API key
+            api_key = os.getenv("PINECONE_API_KEY")
+            if not api_key:
+                raise ValueError("PINECONE_API_KEY not found in environment variables")
             
             # Initialize Pinecone
-            api_key = settings.PINECONE_API_KEY or os.getenv("PINECONE_API_KEY")
-            if not api_key:
-                raise ValueError("PINECONE_API_KEY not found in settings or environment")
+            print("🔌 Initializing Pinecone connection...")
+            self.pc = Pinecone(api_key=api_key)
+            self.index = self.pc.Index("grocery-hybrid")
+            print("✅ Connected to grocery-hybrid index")
             
-            print("🔌 Connecting to Pinecone...")
-            self.pinecone_client = Pinecone(api_key=api_key)
-            self.index = self.pinecone_client.Index(self.index_name)
-            print("✅ Pinecone connected (HYBRID search enabled)")
+            # Load embedding model
+            print("🤖 Loading sentence transformer model...")
+            self.model = SentenceTransformer('all-MiniLM-L6-v2')
+            print("✅ Embedding model loaded")
             
-            # Test the connection
-            stats = self.index.describe_index_stats()
-            print(f"✅ Index stats: {stats.get('total_vector_count', 0):,} vectors")
+            # Load BM25 encoder from saved parameters (NOT fitting from scratch)
+            print("🔤 Loading BM25 encoder parameters...")
+            bm25_params_path = Path(__file__).parent.parent.parent / "bm25_params.json"
+            
+            if not bm25_params_path.exists():
+                print("⚠️  BM25 parameters file not found. Hybrid search will use dense vectors only.")
+                print(f"   Expected location: {bm25_params_path}")
+                self.bm25_encoder = None
+            else:
+                self.bm25_encoder = BM25Encoder.default()
+                self.bm25_encoder.load(str(bm25_params_path))
+                print("✅ BM25 encoder loaded from pre-fitted parameters")
+            
+            self._initialized = True
+            print("🎉 Vector search service initialized successfully")
             
         except Exception as e:
-            print(f"❌ Failed to initialize vector search: {e}")
+            self._init_error = str(e)
+            print(f"❌ Failed to initialize vector search service: {e}")
+            import traceback
             traceback.print_exc()
-            # Don't raise exception - allow app to run without vector search
     
     def is_available(self) -> bool:
         """Check if hybrid search is available"""

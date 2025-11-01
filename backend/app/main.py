@@ -23,8 +23,10 @@ async def lifespan(app: FastAPI):
     
     # Initialize vector search service
     vector_service = get_vector_search_service()
+    vector_service.initialize()  # Actually initialize the service!
+    
     if vector_service.is_available():
-        print("✅ Vector search service initialized")
+        print("✅ Vector search service ready")
     else:
         print("⚠️  Vector search unavailable, will use fallback SQL search")
     
