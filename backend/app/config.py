@@ -28,6 +28,14 @@ class Settings(BaseSettings):
     MAX_CONCURRENT_SCRAPES: int = 5
     SCRAPE_TIMEOUT: int = 30
     
+    # Pinecone
+    PINECONE_API_KEY: str = ""
+    PINECONE_INDEX_NAME: str = "grocery-products"
+    
+    # Vector Search Settings
+    VECTOR_SEARCH_TOP_K: int = 50
+    VECTOR_SEARCH_SCORE_THRESHOLD: float = 0.6
+    
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATA_DIR: Path = BASE_DIR / "data"

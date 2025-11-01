@@ -8,6 +8,7 @@ from typing import Optional, List
 from ..database import get_db
 from ..models import Product as ProductModel
 from ..schemas import Product, ProductList, CategoryCount
+from ..services.vector_search_service import get_vector_search_service
 import math
 
 router = APIRouter(prefix="/api/products", tags=["products"])
@@ -25,7 +26,150 @@ def get_products(
     db: Session = Depends(get_db)
 ):
     """
-    Get paginated list of products with filters
+    Get paginated list of products with filters.
+    Uses semantic search when search query is provided.
+    """
+    # If search query is provided, use semantic search
+    if search and search.strip():
+        return _semantic_search_products(
+            search=search,
+            store=store,
+            category=category,
+            brand=brand,
+            sort=sort,
+            page=page,
+            limit=limit,
+            db=db
+        )
+    
+    # Otherwise, use traditional database query
+    return _database_query_products(
+        store=store,
+        category=category,
+        brand=brand,
+        sort=sort,
+        page=page,
+        limit=limit,
+        db=db
+    )
+
+
+def _semantic_search_products(
+    search: str,
+    store: Optional[str],
+    category: Optional[str],
+    brand: Optional[str],
+    sort: str,
+    page: int,
+    limit: int,
+    db: Session
+) -> ProductList:
+    """
+    Perform semantic search using Pinecone vector database
+    """
+    vector_service = get_vector_search_service()
+    
+    # Check if vector search is available
+    if not vector_service.is_available():
+        # Fallback to database search
+        return _database_query_products(
+            store=store,
+            category=category,
+            brand=brand,
+            sort=sort,
+            page=page,
+            limit=limit,
+            db=db,
+            search=search
+        )
+    
+    # Perform vector search with larger top_k to ensure we have enough results after filtering
+    # We fetch more than needed to account for pagination
+    vector_top_k = limit * page + 50  # Get extra results for pagination
+    
+    # Perform hybrid search with filters
+    # alpha=0.5 provides balanced hybrid search (50% semantic, 50% keyword)
+    vector_results = vector_service.search_with_category(
+        query=search,
+        category=category,
+        store=store,
+        brand=brand,
+        top_k=vector_top_k,
+        score_threshold=0.5,
+        alpha=0.5  # Balanced hybrid search
+    )
+    
+    # If no results found, return empty
+    if not vector_results:
+        return ProductList(
+            products=[],
+            total=0,
+            page=page,
+            pages=0,
+            limit=limit
+        )
+    
+    # Extract product IDs from vector search results
+    product_ids = [result.get('product_id') or result.get('id') for result in vector_results]
+    
+    # Fetch full product details from database to ensure data consistency
+    query = db.query(ProductModel).filter(ProductModel.id.in_(product_ids))
+    
+    # Apply additional filters that might not be in vector results
+    if store:
+        query = query.filter(ProductModel.store == store)
+    if category:
+        query = query.filter(ProductModel.category == category)
+    if brand:
+        query = query.filter(ProductModel.brand == brand)
+    
+    # Get all matching products
+    all_products = query.all()
+    
+    # Create a mapping of product_id to product for efficient lookup
+    product_map = {p.id: p for p in all_products}
+    
+    # Sort products based on vector search order (by similarity score)
+    sorted_products = []
+    for result in vector_results:
+        pid = result.get('product_id') or result.get('id')
+        if pid in product_map:
+            sorted_products.append(product_map[pid])
+    
+    # Apply additional sorting if requested
+    if sort == "price_low":
+        sorted_products.sort(key=lambda p: p.price_numeric if p.price_numeric else float('inf'))
+    elif sort == "price_high":
+        sorted_products.sort(key=lambda p: p.price_numeric if p.price_numeric else 0, reverse=True)
+    # For 'name' or default, keep vector search order (sorted by relevance)
+    
+    # Calculate pagination
+    total = len(sorted_products)
+    pages = math.ceil(total / limit) if total > 0 else 0
+    offset = (page - 1) * limit
+    paginated_products = sorted_products[offset:offset + limit]
+    
+    return ProductList(
+        products=paginated_products,
+        total=total,
+        page=page,
+        pages=pages,
+        limit=limit
+    )
+
+
+def _database_query_products(
+    store: Optional[str],
+    category: Optional[str],
+    brand: Optional[str],
+    sort: str,
+    page: int,
+    limit: int,
+    db: Session,
+    search: Optional[str] = None
+) -> ProductList:
+    """
+    Traditional database query for products (fallback or non-search queries)
     """
     # Start with base query
     query = db.query(ProductModel)

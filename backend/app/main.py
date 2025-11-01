@@ -8,6 +8,7 @@ from contextlib import asynccontextmanager
 from .config import settings
 from .database import init_db
 from .api import products, scraping
+from .services.vector_search_service import get_vector_search_service
 
 
 @asynccontextmanager
@@ -19,6 +20,13 @@ async def lifespan(app: FastAPI):
     print("🚀 Starting Grocery Price Comparison API...")
     init_db()
     print("✅ Database initialized")
+    
+    # Initialize vector search service
+    vector_service = get_vector_search_service()
+    if vector_service.is_available():
+        print("✅ Vector search service initialized")
+    else:
+        print("⚠️  Vector search unavailable, will use fallback SQL search")
     
     yield
     

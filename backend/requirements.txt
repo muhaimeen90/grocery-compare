@@ -10,3 +10,6 @@ aiofiles==23.2.1
 python-dotenv==1.0.0
 greenlet==3.0.1
 pyee==11.0.1
+pinecone-client==3.0.0
+sentence-transformers==2.7.0
+pinecone-text
