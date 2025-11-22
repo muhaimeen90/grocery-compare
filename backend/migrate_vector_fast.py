@@ -80,11 +80,14 @@ def process_chunk(products_chunk: List[Product], model: SentenceTransformer,
     """
     Process a chunk of products: encode and upload in parallel
     """
-    # Extract product names
-    product_names = [p.name for p in products_chunk]
-    
-    # Generate embeddings for this chunk
-    embeddings = model.encode(product_names, show_progress_bar=False, batch_size=64)
+    # Create combined product descriptions for better embeddings
+    product_descriptions = [
+        f"{p.brand or ''} {p.name} {p.category or ''}".strip()
+        for p in products_chunk
+    ]
+
+    # Generate embeddings for this chunk from the combined descriptions
+    embeddings = model.encode(product_descriptions, show_progress_bar=False, batch_size=64)
     
     # Prepare vectors
     vectors = []

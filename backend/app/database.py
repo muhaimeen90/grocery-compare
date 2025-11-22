@@ -35,5 +35,5 @@ def get_db():
 
 def init_db():
     """Initialize database - create all tables"""
-    from .models import Product  # Import models to register them
+    from .models import Product, Cart, CartItem  # Import models to register them
     Base.metadata.create_all(bind=engine)

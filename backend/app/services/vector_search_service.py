@@ -10,6 +10,8 @@ from ..config import settings
 import time
 import traceback
 from pathlib import Path
+from sqlalchemy.orm import Session
+from ..models import Product as ProductModel
 
 
 class VectorSearchService:
@@ -239,6 +241,84 @@ class VectorSearchService:
             filters=filters if filters else None,
             alpha=alpha
         )
+
+    def find_identical_products(self, product_id: int, db: Session) -> List[Dict[str, Any]]:
+        """Find highly similar products from other stores using hybrid search (vector + keyword)
+        
+        We use the product name to generate a fresh search query. This allows us to use
+        hybrid search (dense + sparse vectors) which is much better at finding 
+        exact product matches across stores than pure semantic search.
+        """
+        if not self.index:
+            print("⚠️  Vector index not initialized for identical product search")
+            return []
+        
+        print(f"\n🔍 Finding identical products for product_id={product_id}...")
+
+        # Fetch original product to know its store and ensure it exists
+        original_product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+        if not original_product:
+            print(f"⚠️  Product {product_id} not found in database")
+            return []
+        
+        print(f"  Original: {original_product.name[:60]} ({original_product.store})")
+
+        # Generate query vectors from product name for hybrid search
+        try:
+            # Use the product name as the query
+            # This is more effective than using the stored vector because it allows
+            # us to leverage BM25 (keyword matching) to find the same product
+            dense_vector, sparse_vector = self.encode_query(original_product.name)
+        except Exception as e:
+            print(f"❌ Failed to encode query for product {product_id}: {e}")
+            return []
+
+        try:
+            # Use hybrid search with alpha=0.3 to favor keywords slightly more
+            # for exact product matching (30% dense, 70% sparse)
+            results = self.index.query(
+                vector=dense_vector,
+                sparse_vector=sparse_vector,
+                top_k=5,
+                include_metadata=True,
+                filter={"store": {"$ne": original_product.store}},
+                alpha=0.3 
+            )
+        except Exception as query_error:
+            print(f"❌ Failed to query Pinecone for identical products: {query_error}")
+            return []
+
+        matches = []
+        for match in results.get("matches", []):
+            score = match.get("score", 0)
+            
+            # With hybrid search, scores might be different. 
+            # We'll use a slightly lower threshold but rely on the keyword matching
+            # to bring the right products to the top.
+            if score < 0.60:
+                print(f"  ⚠️  Skipping match with low score {score:.4f}")
+                continue
+                
+            metadata = (match.get("metadata") or {}).copy()
+            if not metadata:
+                continue
+            
+            print(f"  ✅ Found similar product: {metadata.get('name', 'N/A')[:50]} from {metadata.get('store')} (score: {score:.4f})")
+
+            # Ensure we always have a product_id in the metadata payload
+            if "product_id" not in metadata:
+                match_id = match.get("id")
+                if isinstance(match_id, str) and match_id.startswith("product_"):
+                    try:
+                        metadata["product_id"] = int(match_id.replace("product_", ""))
+                    except ValueError:
+                        pass
+
+            metadata["similarity_score"] = score
+            matches.append(metadata)
+        
+        print(f"  📊 Total matches returned: {len(matches)}\n")
+        return matches
 
 
 # Global instance

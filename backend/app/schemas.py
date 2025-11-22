@@ -75,3 +75,48 @@ class ScrapeStatus(BaseModel):
     message: Optional[str] = None
     product_id: Optional[int] = None
     completed_at: Optional[datetime] = None
+
+
+class CartBase(BaseModel):
+    """Base cart schema"""
+    session_id: str = Field(..., min_length=1)
+
+
+class Cart(CartBase):
+    """Cart response schema"""
+    id: int
+
+    class Config:
+        from_attributes = True
+
+
+class CartItemBase(BaseModel):
+    """Base cart item schema"""
+    product_id: int
+    quantity: int = Field(default=1, ge=1)
+
+
+class CartItemCreate(CartItemBase):
+    """Schema for adding cart items"""
+    session_id: str = Field(..., min_length=1)
+
+
+class CartItemDelete(BaseModel):
+    """Schema for deleting cart items"""
+    session_id: str = Field(..., min_length=1)
+
+
+class CartItem(CartItemBase):
+    """Cart item response schema"""
+    id: int
+    cart_id: int
+
+    class Config:
+        from_attributes = True
+
+
+class CartItemWithAlternatives(Product):
+    """Product schema augmented with cart info and alternative matches"""
+    cart_item_id: int
+    quantity: int = Field(default=1, ge=1)
+    alternative_prices: List[Product] = Field(default_factory=list)

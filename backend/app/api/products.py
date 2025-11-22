@@ -88,7 +88,9 @@ def _semantic_search_products(
     vector_top_k = limit * page + 50  # Get extra results for pagination
     
     # Perform hybrid search with filters
-    # alpha=0.5 provides balanced hybrid search (50% semantic, 50% keyword)
+    # alpha=0.6 provides semantic-heavy hybrid search (60% semantic, 40% keyword)
+    # This helps prioritize true semantic matches (e.g., all Coca-Cola products)
+    # over pure keyword matches (e.g., "cola" in different brands)
     vector_results = vector_service.search_with_category(
         query=search,
         category=category,
@@ -96,7 +98,7 @@ def _semantic_search_products(
         brand=brand,
         top_k=vector_top_k,
         score_threshold=0.5,
-        alpha=0.5  # Balanced hybrid search
+        alpha=0.6  # Semantic-heavy for better brand grouping
     )
     
     # If no results found, return empty
@@ -130,11 +132,26 @@ def _semantic_search_products(
     product_map = {p.id: p for p in all_products}
     
     # Sort products based on vector search order (by similarity score)
+    # Apply brand boosting: if search query contains brand name, boost those products
     sorted_products = []
+    search_lower = search.lower()
+    
+    # Separate brand-matching and non-brand-matching products
+    brand_matches = []
+    other_matches = []
+    
     for result in vector_results:
         pid = result.get('product_id') or result.get('id')
         if pid in product_map:
-            sorted_products.append(product_map[pid])
+            product = product_map[pid]
+            # Check if brand is in search query (e.g., "coca cola" matches brand "Coca Cola")
+            if product.brand and product.brand.lower() in search_lower:
+                brand_matches.append(product)
+            else:
+                other_matches.append(product)
+    
+    # Prioritize brand matches, then others
+    sorted_products = brand_matches + other_matches
     
     # Apply additional sorting if requested
     if sort == "price_low":
