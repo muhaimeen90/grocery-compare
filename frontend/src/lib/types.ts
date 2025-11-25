@@ -44,3 +44,16 @@ export interface FilterOptions {
   page?: number;
   limit?: number;
 }
+
+export interface CartItem {
+  id: number;
+  cart_id: number;
+  product_id: number;
+  quantity: number;
+}
+
+export interface CartItemWithAlternatives extends Product {
+  cart_item_id: number;
+  quantity: number;
+  alternative_prices: Product[];
+}

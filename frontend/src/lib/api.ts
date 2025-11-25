@@ -1,5 +1,13 @@
 import axios from 'axios';
-import type { Product, ProductList, CategoryCount, ScrapeStatus, FilterOptions } from './types';
+import type {
+  Product,
+  ProductList,
+  CategoryCount,
+  ScrapeStatus,
+  FilterOptions,
+  CartItem,
+  CartItemWithAlternatives,
+} from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -65,6 +73,28 @@ export const apiClient = {
 
   async scrapeBatch(productIds: number[]): Promise<{ task_id: string; status: string; total: number }> {
     const { data } = await api.post('/api/scrape/batch', { product_ids: productIds });
+    return data;
+  },
+
+  // Cart
+  async getCart(sessionId: string): Promise<CartItemWithAlternatives[]> {
+    const { data } = await api.get<CartItemWithAlternatives[]>(`/api/v1/cart/${sessionId}`);
+    return data;
+  },
+
+  async addToCart(productId: number, sessionId: string, quantity = 1): Promise<CartItem> {
+    const { data } = await api.post<CartItem>('/api/v1/cart/items', {
+      product_id: productId,
+      session_id: sessionId,
+      quantity,
+    });
+    return data;
+  },
+
+  async removeFromCart(productId: number, sessionId: string): Promise<CartItem> {
+    const { data } = await api.delete<CartItem>(`/api/v1/cart/items/${productId}`, {
+      data: { session_id: sessionId },
+    });
     return data;
   },
 };

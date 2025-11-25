@@ -35,6 +35,13 @@ class Settings(BaseSettings):
     # Vector Search Settings
     VECTOR_SEARCH_TOP_K: int = 50
     VECTOR_SEARCH_SCORE_THRESHOLD: float = 0.6
+    VECTOR_SEARCH_ALPHA: float = 0.35  # 35% semantic, 65% keyword for better exact matching
+    
+    # Search Ranking Weights
+    RANKING_EXACT_MATCH_BONUS: float = 100.0  # Bonus for exact phrase match
+    RANKING_WORD_OVERLAP_WEIGHT: float = 50.0  # Weight for word overlap percentage
+    RANKING_BRAND_MATCH_WEIGHT: float = 30.0  # Weight for brand match in query
+    RANKING_VECTOR_WEIGHT: float = 20.0  # Weight for vector similarity score
     
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent

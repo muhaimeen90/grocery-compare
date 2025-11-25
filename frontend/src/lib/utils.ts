@@ -42,3 +42,23 @@ export function truncateText(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
   return text.substring(0, maxLength) + '...';
 }
+
+const SESSION_STORAGE_KEY = 'grocery-compare-session-id';
+
+export function getOrCreateSessionId(): string {
+  if (typeof window === 'undefined') {
+    return '';
+  }
+
+  const existing = window.localStorage.getItem(SESSION_STORAGE_KEY);
+  if (existing) {
+    return existing;
+  }
+
+  const newId = typeof crypto !== 'undefined' && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+
+  window.localStorage.setItem(SESSION_STORAGE_KEY, newId);
+  return newId;
+}

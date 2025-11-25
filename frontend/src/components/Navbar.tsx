@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Search } from 'lucide-react';
+import { ShoppingCart, Search, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -43,6 +43,14 @@ export default function Navbar() {
                 {store}
               </Link>
             ))}
+
+            <Link
+              href="/cart"
+              className="inline-flex items-center gap-1 rounded-full border border-primary-100 px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              Cart
+            </Link>
           </div>
 
           {/* Search */}
@@ -86,6 +94,14 @@ export default function Navbar() {
               {store}
             </Link>
           ))}
+
+          <Link
+            href="/cart"
+            className="flex items-center gap-1 text-sm text-primary-700 font-semibold whitespace-nowrap"
+          >
+            <ShoppingBag className="w-4 h-4" />
+            Cart
+          </Link>
         </div>
       </div>
     </nav>
