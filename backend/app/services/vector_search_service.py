@@ -12,6 +12,7 @@ import traceback
 from pathlib import Path
 from sqlalchemy.orm import Session
 from ..models import Product as ProductModel
+from ..utils.ranking_utils import rank_identical_products
 
 
 class VectorSearchService:
@@ -66,7 +67,10 @@ class VectorSearchService:
                 print(f"   Expected location: {bm25_params_path}")
                 self.bm25_encoder = None
             else:
-                self.bm25_encoder = BM25Encoder.default()
+                # Use BM25Encoder() directly instead of BM25Encoder.default()
+                # .default() tries to download NLTK tokenizers which can hang
+                # Loading from params file provides the tokenizer config
+                self.bm25_encoder = BM25Encoder()
                 self.bm25_encoder.load(str(bm25_params_path))
                 print("✅ BM25 encoder loaded from pre-fitted parameters")
             
@@ -244,10 +248,11 @@ class VectorSearchService:
 
     def find_identical_products(self, product_id: int, db: Session) -> List[Dict[str, Any]]:
         """Find highly similar products from other stores using hybrid search (vector + keyword)
+        with strict size and brand matching for accurate price comparison.
         
-        We use the product name to generate a fresh search query. This allows us to use
-        hybrid search (dense + sparse vectors) which is much better at finding 
-        exact product matches across stores than pure semantic search.
+        Returns one best match per store with approval status based on size/brand match.
+        Products above the auto-approve threshold are considered identical.
+        Products below the threshold but above minimum are returned with needs_approval=True.
         """
         if not self.index:
             print("⚠️  Vector index not initialized for identical product search")
@@ -262,12 +267,10 @@ class VectorSearchService:
             return []
         
         print(f"  Original: {original_product.name[:60]} ({original_product.store})")
+        print(f"  Size: {original_product.size}, Brand: {original_product.brand}")
 
         # Generate query vectors from product name for hybrid search
         try:
-            # Use the product name as the query
-            # This is more effective than using the stored vector because it allows
-            # us to leverage BM25 (keyword matching) to find the same product
             dense_vector, sparse_vector = self.encode_query(original_product.name)
         except Exception as e:
             print(f"❌ Failed to encode query for product {product_id}: {e}")
@@ -275,11 +278,11 @@ class VectorSearchService:
 
         try:
             # Use hybrid search with alpha=0.3 to favor keywords slightly more
-            # for exact product matching (30% dense, 70% sparse)
+            # Fetch more candidates (top_k=15) to have enough for re-ranking
             results = self.index.query(
                 vector=dense_vector,
                 sparse_vector=sparse_vector,
-                top_k=5,
+                top_k=15,
                 include_metadata=True,
                 filter={"store": {"$ne": original_product.store}},
                 alpha=0.3 
@@ -288,22 +291,18 @@ class VectorSearchService:
             print(f"❌ Failed to query Pinecone for identical products: {query_error}")
             return []
 
-        matches = []
+        # Collect all candidates from vector search (lower threshold to get more candidates)
+        candidates = []
         for match in results.get("matches", []):
             score = match.get("score", 0)
             
-            # With hybrid search, scores might be different. 
-            # We'll use a slightly lower threshold but rely on the keyword matching
-            # to bring the right products to the top.
-            if score < 0.60:
-                print(f"  ⚠️  Skipping match with low score {score:.4f}")
+            # Use a lower threshold here - the re-ranking will filter properly
+            if score < 0.40:
                 continue
                 
             metadata = (match.get("metadata") or {}).copy()
             if not metadata:
                 continue
-            
-            print(f"  ✅ Found similar product: {metadata.get('name', 'N/A')[:50]} from {metadata.get('store')} (score: {score:.4f})")
 
             # Ensure we always have a product_id in the metadata payload
             if "product_id" not in metadata:
@@ -315,10 +314,39 @@ class VectorSearchService:
                         pass
 
             metadata["similarity_score"] = score
-            matches.append(metadata)
+            candidates.append(metadata)
         
-        print(f"  📊 Total matches returned: {len(matches)}\n")
-        return matches
+        print(f"  📊 Vector search returned {len(candidates)} candidates")
+        
+        if not candidates:
+            return []
+        
+        # Re-rank candidates using strict size/brand matching
+        original_data = {
+            'size': original_product.size,
+            'brand': original_product.brand,
+            'store': original_product.store,
+        }
+        
+        ranked_matches = rank_identical_products(
+            original_product=original_data,
+            candidates=candidates,
+            size_match_bonus=settings.IDENTICAL_SIZE_MATCH_BONUS,
+            brand_match_bonus=settings.IDENTICAL_BRAND_MATCH_BONUS,
+            size_mismatch_penalty=settings.IDENTICAL_SIZE_MISMATCH_PENALTY,
+            brand_mismatch_penalty=settings.IDENTICAL_BRAND_MISMATCH_PENALTY,
+            auto_approve_threshold=settings.IDENTICAL_AUTO_APPROVE_THRESHOLD,
+            minimum_score=settings.IDENTICAL_MINIMUM_SCORE,
+        )
+        
+        for match in ranked_matches:
+            status = "✅ AUTO" if not match.get('needs_approval') else "⚠️ NEEDS APPROVAL"
+            print(f"  {status}: {match.get('name', 'N/A')[:50]} from {match.get('store')} "
+                  f"(score: {match.get('identical_score', 0):.3f}, "
+                  f"size_match: {match.get('size_matched')}, brand_match: {match.get('brand_matched')})")
+        
+        print(f"  📊 Total matches after re-ranking: {len(ranked_matches)}\n")
+        return ranked_matches
 
 
 # Global instance

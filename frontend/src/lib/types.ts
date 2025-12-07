@@ -4,6 +4,7 @@ export interface Product {
   price: string;
   price_numeric: number | null;
   brand: string | null;
+  size: string | null;
   category: string;
   store: string;
   product_url: string | null;
@@ -52,8 +53,49 @@ export interface CartItem {
   quantity: number;
 }
 
+export interface ProductWithApproval extends Product {
+  needs_approval: boolean;
+  identical_score: number | null;
+  size_matched: boolean;
+  brand_matched: boolean;
+}
+
 export interface CartItemWithAlternatives extends Product {
   cart_item_id: number;
   quantity: number;
-  alternative_prices: Product[];
+  alternative_prices: ProductWithApproval[];
+}
+
+// Cart Comparison Types
+export interface ProductMatch {
+  original_product: Product;
+  matched_product: Product | null;
+  is_available: boolean;
+  similarity_score?: number;
+  needs_approval?: boolean;
+  size_matched?: boolean;
+  brand_matched?: boolean;
+}
+
+export interface StoreComparison {
+  store: string;
+  products: ProductMatch[];
+  total: number;
+  available_count: number;
+  missing_count: number;
+}
+
+export interface BestDealItem {
+  original_product: Product;
+  best_product: Product;
+  store: string;
+  price: number;
+  savings: number;
+}
+
+export interface CompareResponse {
+  store_comparisons: StoreComparison[];
+  best_deal: BestDealItem[];
+  best_deal_total: number;
+  best_deal_savings: number;
 }

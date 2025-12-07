@@ -43,6 +43,14 @@ class Settings(BaseSettings):
     RANKING_BRAND_MATCH_WEIGHT: float = 30.0  # Weight for brand match in query
     RANKING_VECTOR_WEIGHT: float = 20.0  # Weight for vector similarity score
     
+    # Identical Product Matching Settings
+    IDENTICAL_SIZE_MATCH_BONUS: float = 50.0  # Bonus for exact size match
+    IDENTICAL_BRAND_MATCH_BONUS: float = 40.0  # Bonus for exact brand match
+    IDENTICAL_SIZE_MISMATCH_PENALTY: float = 80.0  # Penalty for size mismatch
+    IDENTICAL_BRAND_MISMATCH_PENALTY: float = 30.0  # Penalty for brand mismatch
+    IDENTICAL_AUTO_APPROVE_THRESHOLD: float = 0.75  # Above this = auto-approved
+    IDENTICAL_MINIMUM_SCORE: float = 0.40  # Below this = no match at all
+    
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATA_DIR: Path = BASE_DIR / "data"

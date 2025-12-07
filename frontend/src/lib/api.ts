@@ -7,6 +7,7 @@ import type {
   FilterOptions,
   CartItem,
   CartItemWithAlternatives,
+  CompareResponse,
 } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
@@ -94,6 +95,14 @@ export const apiClient = {
   async removeFromCart(productId: number, sessionId: string): Promise<CartItem> {
     const { data } = await api.delete<CartItem>(`/api/v1/cart/items/${productId}`, {
       data: { session_id: sessionId },
+    });
+    return data;
+  },
+
+  async compareCart(productIds: number[], sessionId: string): Promise<CompareResponse> {
+    const { data } = await api.post<CompareResponse>('/api/v1/cart/compare', {
+      product_ids: productIds,
+      session_id: sessionId,
     });
     return data;
   },

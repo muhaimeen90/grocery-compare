@@ -215,3 +215,158 @@ def get_word_overlap_percentage(product_name: str, search_query: str) -> float:
     
     overlap = len(query_words & name_words)
     return overlap / len(query_words)
+
+
+# ============== Identical Product Matching Utilities ==============
+
+def calculate_identical_product_score(
+    original_size: str,
+    original_brand: str,
+    candidate_size: str,
+    candidate_brand: str,
+    vector_score: float,
+    size_match_bonus: float = 50.0,
+    brand_match_bonus: float = 40.0,
+    size_mismatch_penalty: float = 80.0,
+    brand_mismatch_penalty: float = 30.0,
+) -> tuple[float, bool, bool]:
+    """
+    Calculate a score for how identical a candidate product is to the original.
+    Uses strict matching for size and brand fields (already normalized).
+    
+    Args:
+        original_size: Size of the original product (e.g., "1.25l", "4x250ml")
+        original_brand: Brand of the original product
+        candidate_size: Size of the candidate product
+        candidate_brand: Brand of the candidate product
+        vector_score: The semantic similarity score from vector search (0-1)
+        size_match_bonus: Points added for exact size match
+        brand_match_bonus: Points added for exact brand match
+        size_mismatch_penalty: Points deducted for size mismatch
+        brand_mismatch_penalty: Points deducted for brand mismatch
+    
+    Returns:
+        Tuple of (final_score, size_matched, brand_matched)
+    """
+    # Start with the vector similarity score (normalized to 0-100 scale)
+    score = vector_score * 100.0
+    
+    # Strict size comparison (fields are pre-normalized)
+    orig_size_clean = (original_size or "").strip().lower()
+    cand_size_clean = (candidate_size or "").strip().lower()
+    
+    size_matched = False
+    if orig_size_clean and cand_size_clean:
+        if orig_size_clean == cand_size_clean:
+            score += size_match_bonus
+            size_matched = True
+        else:
+            score -= size_mismatch_penalty
+    elif orig_size_clean or cand_size_clean:
+        # One has size, one doesn't - penalize but less severely
+        score -= size_mismatch_penalty * 0.5
+    # If both are empty, no penalty (unknown sizes)
+    
+    # Strict brand comparison (fields are pre-normalized)
+    orig_brand_clean = (original_brand or "").strip().lower()
+    cand_brand_clean = (candidate_brand or "").strip().lower()
+    
+    brand_matched = False
+    if orig_brand_clean and cand_brand_clean:
+        if orig_brand_clean == cand_brand_clean:
+            score += brand_match_bonus
+            brand_matched = True
+        else:
+            score -= brand_mismatch_penalty
+    elif orig_brand_clean or cand_brand_clean:
+        # One has brand, one doesn't - small penalty
+        score -= brand_mismatch_penalty * 0.3
+    # If both are empty, no penalty
+    
+    # Normalize score back to 0-1 range
+    # Max possible: 100 + 50 + 40 = 190
+    # Min possible: 0 - 80 - 30 = -110
+    # Normalize to 0-1 with some buffer
+    normalized_score = max(0.0, min(1.0, (score + 110) / 300))
+    
+    return normalized_score, size_matched, brand_matched
+
+
+def rank_identical_products(
+    original_product: dict,
+    candidates: List[dict],
+    size_match_bonus: float = 50.0,
+    brand_match_bonus: float = 40.0,
+    size_mismatch_penalty: float = 80.0,
+    brand_mismatch_penalty: float = 30.0,
+    auto_approve_threshold: float = 0.75,
+    minimum_score: float = 0.40,
+) -> List[dict]:
+    """
+    Rank candidate products by how identical they are to the original product.
+    Returns one best match per store with approval status.
+    
+    Args:
+        original_product: Dict with keys 'size', 'brand', 'store'
+        candidates: List of candidate products with 'size', 'brand', 'store', 'similarity_score'
+        size_match_bonus: Points for exact size match
+        brand_match_bonus: Points for exact brand match
+        size_mismatch_penalty: Points deducted for size mismatch
+        brand_mismatch_penalty: Points deducted for brand mismatch
+        auto_approve_threshold: Score above this = auto-approved
+        minimum_score: Score below this = not returned at all
+    
+    Returns:
+        List of best candidates per store with 'needs_approval' flag
+    """
+    original_size = original_product.get('size', '')
+    original_brand = original_product.get('brand', '')
+    original_store = original_product.get('store', '')
+    
+    # Score all candidates
+    scored_candidates = []
+    for candidate in candidates:
+        # Skip if same store as original
+        if candidate.get('store') == original_store:
+            continue
+            
+        vector_score = candidate.get('similarity_score', 0.0)
+        
+        final_score, size_matched, brand_matched = calculate_identical_product_score(
+            original_size=original_size,
+            original_brand=original_brand,
+            candidate_size=candidate.get('size', ''),
+            candidate_brand=candidate.get('brand', ''),
+            vector_score=vector_score,
+            size_match_bonus=size_match_bonus,
+            brand_match_bonus=brand_match_bonus,
+            size_mismatch_penalty=size_mismatch_penalty,
+            brand_mismatch_penalty=brand_mismatch_penalty,
+        )
+        
+        # Skip if below minimum threshold
+        if final_score < minimum_score:
+            continue
+        
+        # Determine if this needs user approval
+        needs_approval = final_score < auto_approve_threshold
+        
+        scored_candidates.append({
+            **candidate,
+            'identical_score': final_score,
+            'size_matched': size_matched,
+            'brand_matched': brand_matched,
+            'needs_approval': needs_approval,
+        })
+    
+    # Sort by score descending
+    scored_candidates.sort(key=lambda x: x['identical_score'], reverse=True)
+    
+    # Keep only the best match per store
+    best_per_store = {}
+    for candidate in scored_candidates:
+        store = candidate.get('store')
+        if store and store not in best_per_store:
+            best_per_store[store] = candidate
+    
+    return list(best_per_store.values())

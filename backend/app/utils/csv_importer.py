@@ -28,6 +28,10 @@ def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
         'imageURL': 'image_url',
         'ProductURL': 'product_url',
         'ImageURL': 'image_url',
+        'Size': 'size',
+        'SIZE': 'size',
+        'Brand': 'brand',
+        'BRAND': 'brand',
     }
     
     df.rename(columns=column_map, inplace=True)
@@ -91,6 +95,7 @@ def import_csv_file(
         
         # Fill missing values
         df['brand'] = df.get('brand', '')
+        df['size'] = df.get('size', '')
         df['product_url'] = df.get('product_url', '')
         df['image_url'] = df.get('image_url', '')
         
@@ -102,6 +107,7 @@ def import_csv_file(
                 price=str(row['price']),  # Ensure price is string
                 price_numeric=row['price_numeric'],
                 brand=row['brand'] if pd.notna(row['brand']) else None,
+                size=row['size'] if pd.notna(row['size']) else None,
                 category=row['category'],
                 store=row['store'],
                 product_url=row['product_url'] if pd.notna(row['product_url']) else None,

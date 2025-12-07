@@ -64,12 +64,22 @@ export default function ProductCard({ product, onPriceUpdate }: ProductCardProps
 
       {/* Content */}
       <div className="flex flex-1 flex-col p-4">
-        {/* Brand */}
-        {product.brand && (
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
-            {product.brand}
-          </p>
-        )}
+        {/* Brand & Size */}
+        <div className="flex items-center gap-2 mb-1">
+          {product.brand && (
+            <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {product.brand}
+            </p>
+          )}
+          {product.brand && product.size && (
+            <span className="text-gray-300">•</span>
+          )}
+          {product.size && (
+            <p className="text-xs text-gray-400">
+              {product.size}
+            </p>
+          )}
+        </div>
 
         {/* Name */}
         <h3 className="text-sm font-medium text-gray-900 line-clamp-2 mb-2 min-h-[2.5rem]" title={product.name}>

@@ -11,6 +11,7 @@ class ProductBase(BaseModel):
     name: str
     price: str
     brand: Optional[str] = None
+    size: Optional[str] = None
     category: str
     store: str
     product_url: Optional[str] = None
@@ -115,8 +116,61 @@ class CartItem(CartItemBase):
         from_attributes = True
 
 
+class ProductWithApproval(Product):
+    """Product schema with approval status for identical product matching"""
+    needs_approval: bool = False  # True if user should confirm this is the same product
+    identical_score: Optional[float] = None  # Score from identical product matching (0-1)
+    size_matched: bool = False  # True if size exactly matches original
+    brand_matched: bool = False  # True if brand exactly matches original
+
+
 class CartItemWithAlternatives(Product):
     """Product schema augmented with cart info and alternative matches"""
     cart_item_id: int
     quantity: int = Field(default=1, ge=1)
-    alternative_prices: List[Product] = Field(default_factory=list)
+    alternative_prices: List[ProductWithApproval] = Field(default_factory=list)
+
+
+# ============== Cart Comparison Schemas ==============
+
+class CompareRequest(BaseModel):
+    """Schema for cart comparison request"""
+    product_ids: List[int] = Field(..., min_length=1, description="List of product IDs to compare")
+    session_id: str = Field(..., min_length=1)
+
+
+class ProductMatch(BaseModel):
+    """A product match for comparison - either found or missing"""
+    original_product: Product
+    matched_product: Optional[Product] = None
+    is_available: bool = True
+    similarity_score: Optional[float] = None
+    needs_approval: bool = False  # True if user should confirm this match
+    size_matched: bool = False  # True if size exactly matches original
+    brand_matched: bool = False  # True if brand exactly matches original
+
+
+class StoreComparison(BaseModel):
+    """Comparison data for a single store"""
+    store: str
+    products: List[ProductMatch]
+    total: float
+    available_count: int
+    missing_count: int
+
+
+class BestDealItem(BaseModel):
+    """An item in the best deal calculation"""
+    original_product: Product
+    best_product: Product
+    store: str
+    price: float
+    savings: float = 0.0  # Savings compared to original
+
+
+class CompareResponse(BaseModel):
+    """Response schema for cart comparison"""
+    store_comparisons: List[StoreComparison]
+    best_deal: List[BestDealItem]
+    best_deal_total: float
+    best_deal_savings: float

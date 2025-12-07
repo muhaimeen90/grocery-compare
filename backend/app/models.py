@@ -16,6 +16,7 @@ class Product(Base):
     price = Column(String, nullable=False)  # Raw price string (e.g., "$12.99")
     price_numeric = Column(Float, index=True)  # Numeric for sorting
     brand = Column(String, index=True)
+    size = Column(String, nullable=True)  # Product size (e.g., "500g", "1L")
     category = Column(String, nullable=False, index=True)
     store = Column(String, nullable=False, index=True)  # 'IGA', 'Woolworths', 'Coles'
     product_url = Column(Text)
