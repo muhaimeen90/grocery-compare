@@ -58,6 +58,8 @@ export interface ProductWithApproval extends Product {
   identical_score: number | null;
   size_matched: boolean;
   brand_matched: boolean;
+  is_fallback?: boolean;
+  fallback_type?: 'same_brand_diff_size' | 'same_size_diff_brand' | null;
 }
 
 export interface CartItemWithAlternatives extends Product {
@@ -75,6 +77,8 @@ export interface ProductMatch {
   needs_approval?: boolean;
   size_matched?: boolean;
   brand_matched?: boolean;
+  is_fallback?: boolean;
+  fallback_type?: 'same_brand_diff_size' | 'same_size_diff_brand' | null;
 }
 
 export interface StoreComparison {

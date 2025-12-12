@@ -120,6 +120,8 @@ def get_cart(session_id: str, db: Session = Depends(get_db)) -> List[CartItemWit
                         identical_score=meta.get('identical_score'),
                         size_matched=meta.get('size_matched', False),
                         brand_matched=meta.get('brand_matched', False),
+                        is_fallback=meta.get('is_fallback', False),
+                        fallback_type=meta.get('fallback_type'),
                     )
                     alternative_schemas.append(alt_schema)
 
@@ -255,6 +257,8 @@ def compare_cart_items(
                     needs_approval=meta.get('needs_approval', False),
                     size_matched=meta.get('size_matched', True),
                     brand_matched=meta.get('brand_matched', True),
+                    is_fallback=meta.get('is_fallback', False),
+                    fallback_type=meta.get('fallback_type'),
                 ))
             else:
                 missing_count += 1

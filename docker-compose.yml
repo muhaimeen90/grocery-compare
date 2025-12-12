@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: grocery-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - APP_NAME=Grocery Price Comparison API
+      - DEBUG=true
+      - DATABASE_URL=sqlite:///./data/grocery_prices.db
+      - CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://frontend:3000,http://host.docker.internal:3000
+      - MAX_CONCURRENT_SCRAPES=5
+      - SCRAPE_TIMEOUT=30
+      - PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
+      - PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+      - PINECONE_API_KEY=${PINECONE_API_KEY:-}
+    volumes:
+      - ./backend/data:/app/data
+      - backend-cache:/root/.cache
+    networks:
+      - grocery-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: grocery-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NODE_ENV=production
+    depends_on:
+      - backend
+    networks:
+      - grocery-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  grocery-network:
+    driver: bridge
+
+volumes:
+  backend-cache:

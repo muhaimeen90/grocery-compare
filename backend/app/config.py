@@ -2,7 +2,9 @@
 Application Configuration
 """
 from pydantic_settings import BaseSettings
+from pydantic import field_validator
 from pathlib import Path
+from typing import Union
 
 
 class Settings(BaseSettings):
@@ -17,12 +19,19 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "sqlite:///./data/grocery_prices.db"
     
     # CORS
-    CORS_ORIGINS: list = [
+    CORS_ORIGINS: Union[list, str] = [
         "http://localhost:3000",
         "http://127.0.0.1:3000",
         "https://*.vercel.app",
         "https://*.onrender.com",
     ]
+    
+    @field_validator('CORS_ORIGINS', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if isinstance(v, str):
+            return [origin.strip() for origin in v.split(',')]
+        return v
     
     # Scraping
     MAX_CONCURRENT_SCRAPES: int = 5

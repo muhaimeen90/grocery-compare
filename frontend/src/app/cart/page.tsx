@@ -89,6 +89,13 @@ export default function CartPage() {
   };
 
   const handleApproveAlt = (originalProductId: number, alt: ProductWithApproval) => {
+    // Find all alternatives for this product from the same store
+    const item = items.find(i => i.id === originalProductId);
+    const otherAltsFromSameStore = item?.alternative_prices.filter(
+      a => a.store === alt.store && a.id !== alt.id
+    ) || [];
+
+    // Approve this alternative
     setApprovedAlts((prev) => ({
       ...prev,
       [originalProductId]: {
@@ -96,6 +103,7 @@ export default function CartPage() {
         [alt.store]: alt.id,
       },
     }));
+    
     // Remove from discarded if it was there
     setDiscardedAlts((prev) => {
       const next = { ...prev };
@@ -106,6 +114,20 @@ export default function CartPage() {
       }
       return next;
     });
+
+    // Automatically discard other alternatives from the same store
+    if (otherAltsFromSameStore.length > 0) {
+      setDiscardedAlts((prev) => {
+        const next = { ...prev };
+        if (!next[originalProductId]) {
+          next[originalProductId] = new Set();
+        }
+        const newSet = new Set(next[originalProductId]);
+        otherAltsFromSameStore.forEach(a => newSet.add(a.id));
+        next[originalProductId] = newSet;
+        return next;
+      });
+    }
   };
 
   const handleDiscardAlt = (originalProductId: number, alt: ProductWithApproval) => {
@@ -331,6 +353,16 @@ export default function CartPage() {
                                   <div className="flex items-center gap-2 flex-wrap">
                                     <span className={cn('badge', getStoreBadgeClass(alt.store))}>{alt.store}</span>
                                     <p className="text-sm font-semibold text-gray-900">{alt.name}</p>
+                                    {alt.is_fallback && alt.fallback_type === 'same_brand_diff_size' && (
+                                      <span className="inline-flex items-center gap-1 text-xs font-medium text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+                                        Same Brand, Different Size
+                                      </span>
+                                    )}
+                                    {alt.is_fallback && alt.fallback_type === 'same_size_diff_brand' && (
+                                      <span className="inline-flex items-center gap-1 text-xs font-medium text-purple-700 bg-purple-100 px-2 py-0.5 rounded-full">
+                                        Same Size, Different Brand
+                                      </span>
+                                    )}
                                     {needsApproval && (
                                       <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full">
                                         Needs Review
@@ -341,7 +373,7 @@ export default function CartPage() {
                                         <CheckCircle className="w-3 h-3" /> Approved
                                       </span>
                                     )}
-                                    {!alt.needs_approval && !isApproved && (
+                                    {!alt.needs_approval && !isApproved && !alt.is_fallback && (
                                       <span className="inline-flex items-center gap-1 text-xs font-medium text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
                                         <CheckCircle className="w-3 h-3" /> Auto-matched
                                       </span>

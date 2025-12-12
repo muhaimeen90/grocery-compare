@@ -6,6 +6,7 @@ from sentence_transformers import SentenceTransformer
 from pinecone import Pinecone
 from pinecone_text.sparse import BM25Encoder
 import os
+import difflib
 from ..config import settings
 import time
 import traceback
@@ -34,11 +35,20 @@ class VectorSearchService:
         
         try:
             import os
+            import nltk
             from dotenv import load_dotenv
             from pinecone import Pinecone
             from sentence_transformers import SentenceTransformer
             from pinecone_text.sparse import BM25Encoder
             from pathlib import Path
+            
+            # Download required NLTK data
+            try:
+                nltk.download('punkt', quiet=True)
+                nltk.download('punkt_tab', quiet=True)
+                nltk.download('stopwords', quiet=True)
+            except Exception as e:
+                print(f"⚠️  Failed to download NLTK data: {e}")
             
             load_dotenv()
             
@@ -250,13 +260,17 @@ class VectorSearchService:
         """Find highly similar products from other stores using hybrid search (vector + keyword)
         with strict size and brand matching for accurate price comparison.
         
-        Returns one best match per store with approval status based on size/brand match.
-        Products above the auto-approve threshold are considered identical.
-        Products below the threshold but above minimum are returned with needs_approval=True.
+        Returns alternatives per store with approval status:
+        - Primary match: exact or very similar product (auto-approved if score is high)
+        - Fallback alternatives: same brand/diff size OR same size/diff brand (needs approval)
+        
+        The user can approve one alternative per store, not both.
         """
         if not self.index:
             print("⚠️  Vector index not initialized for identical product search")
             return []
+        
+        STORES = ["IGA", "Woolworths", "Coles"]
         
         print(f"\n🔍 Finding identical products for product_id={product_id}...")
 
@@ -278,11 +292,11 @@ class VectorSearchService:
 
         try:
             # Use hybrid search with alpha=0.3 to favor keywords slightly more
-            # Fetch more candidates (top_k=15) to have enough for re-ranking
+            # Fetch more candidates (top_k=50) to have enough for re-ranking and fallbacks
             results = self.index.query(
                 vector=dense_vector,
                 sparse_vector=sparse_vector,
-                top_k=15,
+                top_k=50,
                 include_metadata=True,
                 filter={"store": {"$ne": original_product.store}},
                 alpha=0.3 
@@ -318,9 +332,6 @@ class VectorSearchService:
         
         print(f"  📊 Vector search returned {len(candidates)} candidates")
         
-        if not candidates:
-            return []
-        
         # Re-rank candidates using strict size/brand matching
         original_data = {
             'size': original_product.size,
@@ -339,13 +350,176 @@ class VectorSearchService:
             minimum_score=settings.IDENTICAL_MINIMUM_SCORE,
         )
         
+        # --- Add Alternative Options for Stores with NEEDS_APPROVAL Items ---
+        # Normalize original product fields for comparison
+        orig_size_clean = (original_product.size or "").strip().lower()
+        orig_brand_clean = (original_product.brand or "").strip().lower()
+        
+        # Group ranked matches by store
+        matches_by_store = {}
+        for match in ranked_matches:
+            store = match.get('store')
+            if store:
+                matches_by_store[store] = match
+        
+        # For stores with needs_approval matches, add both alternatives
+        stores_needing_alternatives = [
+            m['store'] for m in ranked_matches 
+            if m.get('needs_approval') and not m.get('is_fallback')
+        ]
+        
+        # Also check for completely missing stores
+        found_stores = {m['store'] for m in ranked_matches}
+        missing_stores = [s for s in STORES if s != original_product.store and s not in found_stores]
+        
+        # Process both types of stores (needs approval + missing)
+        stores_to_process = list(set(stores_needing_alternatives + missing_stores))
+        
+        # Track product IDs already in ranked_matches to avoid duplicates
+        existing_product_ids = {m.get('product_id') for m in ranked_matches if m.get('product_id')}
+        
+        for store in stores_to_process:
+            alternatives = []
+            
+            # Strategy A: Same Brand / Different Size
+            if orig_brand_clean:
+                brand_products = db.query(ProductModel).filter(
+                    ProductModel.store == store,
+                    ProductModel.brand.ilike(original_product.brand)
+                ).all()
+                
+                if brand_products:
+                    # Rank by name similarity to original product
+                    best_brand_match = None
+                    best_score = -1.0
+                    
+                    for bp in brand_products:
+                        # Skip if already in results
+                        if bp.id in existing_product_ids:
+                            continue
+                        # Calculate name similarity
+                        score = difflib.SequenceMatcher(None, original_product.name.lower(), bp.name.lower()).ratio()
+                        if score > best_score:
+                            best_score = score
+                            best_brand_match = bp
+                    
+                    if best_brand_match and best_score >= 0.3:  # Minimum similarity threshold
+                        bp_size_clean = (best_brand_match.size or "").strip().lower()
+                        # Only add if size is different (otherwise it's not really an alternative)
+                        if bp_size_clean != orig_size_clean:
+                            print(f"  🔄 Alternative A (Brand Match) for {store}: {best_brand_match.name[:50]} (score: {best_score:.3f})")
+                            alternatives.append({
+                                "product_id": best_brand_match.id,
+                                "name": best_brand_match.name,
+                                "brand": best_brand_match.brand,
+                                "size": best_brand_match.size,
+                                "store": best_brand_match.store,
+                                "price": best_brand_match.price,
+                                "image_url": best_brand_match.image_url,
+                                "category": best_brand_match.category,
+                                "product_url": best_brand_match.product_url,
+                                "similarity_score": best_score,
+                                "identical_score": best_score * 0.6,  # Lower score to indicate it's a fallback
+                                "brand_matched": True,
+                                "size_matched": False,
+                                "needs_approval": True,
+                                "is_fallback": True,
+                                "fallback_type": "same_brand_diff_size"
+                            })
+                            existing_product_ids.add(best_brand_match.id)
+            
+            # Strategy B: Same Size / Different Brand
+            if orig_size_clean:
+                # First try vector search candidates
+                store_candidates = [c for c in candidates if c.get('store') == store]
+                size_matches = [
+                    c for c in store_candidates 
+                    if (c.get('size') or "").strip().lower() == orig_size_clean and 
+                       (c.get('brand') or "").strip().lower() != orig_brand_clean and
+                       c.get('product_id') not in existing_product_ids  # Avoid duplicates
+                ]
+                
+                best_size_match = None
+                if size_matches:
+                    # Pick best one (highest similarity score)
+                    size_matches.sort(key=lambda x: x.get('similarity_score', 0), reverse=True)
+                    best_size_match = size_matches[0]
+                    
+                    print(f"  🔄 Alternative B (Size Match - Vector) for {store}: {best_size_match.get('name', '')[:50]} (score: {best_size_match.get('similarity_score', 0):.3f})")
+                    
+                    alternatives.append({
+                        **best_size_match,
+                        "brand_matched": False,
+                        "size_matched": True,
+                        "needs_approval": True,
+                        "identical_score": best_size_match.get('similarity_score', 0) * 0.6,
+                        "is_fallback": True,
+                        "fallback_type": "same_size_diff_brand"
+                    })
+                    existing_product_ids.add(best_size_match.get('product_id'))
+                
+                # If vector search didn't find anything, try database query
+                if not best_size_match:
+                    size_products = db.query(ProductModel).filter(
+                        ProductModel.store == store,
+                        ProductModel.size.ilike(original_product.size)
+                    ).all()
+                    
+                    if size_products:
+                        # Filter out same brand and already existing products
+                        size_products = [
+                            p for p in size_products 
+                            if (p.brand or "").strip().lower() != orig_brand_clean and
+                               p.id not in existing_product_ids
+                        ]
+                        
+                        if size_products:
+                            # Rank by name similarity
+                            best_db_match = None
+                            best_db_score = -1.0
+                            
+                            for sp in size_products:
+                                score = difflib.SequenceMatcher(None, original_product.name.lower(), sp.name.lower()).ratio()
+                                if score > best_db_score:
+                                    best_db_score = score
+                                    best_db_match = sp
+                            
+                            if best_db_match and best_db_score >= 0.25:  # Lower threshold for size matches
+                                print(f"  🔄 Alternative B (Size Match - DB) for {store}: {best_db_match.name[:50]} (score: {best_db_score:.3f})")
+                                alternatives.append({
+                                    "product_id": best_db_match.id,
+                                    "name": best_db_match.name,
+                                    "brand": best_db_match.brand,
+                                    "size": best_db_match.size,
+                                    "store": best_db_match.store,
+                                    "price": best_db_match.price,
+                                    "image_url": best_db_match.image_url,
+                                    "category": best_db_match.category,
+                                    "product_url": best_db_match.product_url,
+                                    "similarity_score": best_db_score,
+                                    "identical_score": best_db_score * 0.5,
+                                    "brand_matched": False,
+                                    "size_matched": True,
+                                    "needs_approval": True,
+                                    "is_fallback": True,
+                                    "fallback_type": "same_size_diff_brand"
+                                })
+                                existing_product_ids.add(best_db_match.id)
+            
+            # Add both alternatives to the result list
+            ranked_matches.extend(alternatives)
+        
+        # Sort final list by score (descending)
+        ranked_matches.sort(key=lambda x: x.get('identical_score', 0), reverse=True)
+        
         for match in ranked_matches:
             status = "✅ AUTO" if not match.get('needs_approval') else "⚠️ NEEDS APPROVAL"
+            fallback_info = f" [{match.get('fallback_type', 'primary')}]" if match.get('is_fallback') else ""
             print(f"  {status}: {match.get('name', 'N/A')[:50]} from {match.get('store')} "
                   f"(score: {match.get('identical_score', 0):.3f}, "
-                  f"size_match: {match.get('size_matched')}, brand_match: {match.get('brand_matched')})")
+                  f"size_match: {match.get('size_matched')}, brand_match: {match.get('brand_matched')}){fallback_info}")
         
-        print(f"  📊 Total matches after re-ranking: {len(ranked_matches)}\n")
+        print(f"  📊 Total matches after re-ranking and fallbacks: {len(ranked_matches)}\n")
         return ranked_matches
 
 

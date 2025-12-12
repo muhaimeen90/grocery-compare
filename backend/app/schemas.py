@@ -122,6 +122,8 @@ class ProductWithApproval(Product):
     identical_score: Optional[float] = None  # Score from identical product matching (0-1)
     size_matched: bool = False  # True if size exactly matches original
     brand_matched: bool = False  # True if brand exactly matches original
+    is_fallback: bool = False  # True if this is a fallback alternative (not primary match)
+    fallback_type: Optional[str] = None  # Type: 'same_brand_diff_size' or 'same_size_diff_brand'
 
 
 class CartItemWithAlternatives(Product):
@@ -148,6 +150,8 @@ class ProductMatch(BaseModel):
     needs_approval: bool = False  # True if user should confirm this match
     size_matched: bool = False  # True if size exactly matches original
     brand_matched: bool = False  # True if brand exactly matches original
+    is_fallback: bool = False  # True if this is a fallback alternative (not primary match)
+    fallback_type: Optional[str] = None  # Type: 'same_brand_diff_size' or 'same_size_diff_brand'
 
 
 class StoreComparison(BaseModel):
