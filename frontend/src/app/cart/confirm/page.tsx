@@ -3,25 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, ShoppingBag, Star, XCircle, AlertTriangle } from 'lucide-react';
+import { AlertCircle, ArrowLeft, CheckCircle2, Loader2, ShoppingBag, Store, AlertTriangle } from 'lucide-react';
 
 import { apiClient } from '@/lib/api';
-import type { CompareResponse, StoreComparison, BestDealItem, ProductMatch } from '@/lib/types';
+import type { CompareResponse, SingleStoreOption, TwoStoreOption, ProductMatch } from '@/lib/types';
 import { cn, getImageUrl, getOrCreateSessionId, getStoreBadgeClass } from '@/lib/utils';
-
-const STORES = ['IGA', 'Woolworths', 'Coles'];
-
-// Types for stored approval data
-type ApprovedAlternatives = Record<number, Record<string, number>>;
-type DiscardedAlternatives = Record<number, number[]>;
-
-function getStoreCardClass(store: string): string {
-  const storeLower = store.toLowerCase();
-  if (storeLower === 'iga') return 'border-red-200 bg-red-50/30';
-  if (storeLower === 'woolworths') return 'border-green-200 bg-green-50/30';
-  if (storeLower === 'coles') return 'border-red-200 bg-red-50/30';
-  return 'border-gray-200 bg-gray-50/30';
-}
 
 function getStoreHeaderClass(store: string): string {
   const storeLower = store.toLowerCase();
@@ -31,123 +17,83 @@ function getStoreHeaderClass(store: string): string {
   return 'bg-gray-600 text-white';
 }
 
-export default function ConfirmPage() {
+function ProductMatchCard({ match, showStore }: { match: ProductMatch; showStore?: boolean }) {
+  const matched = match.matched_product;
+  
+  return (
+    <div className={cn(
+      "card p-4 flex flex-col sm:flex-row gap-4",
+      !match.is_available && "opacity-60 bg-gray-50"
+    )}>
+      {/* Product Image */}
+      <div className="relative w-24 h-24 bg-gray-50 rounded flex-shrink-0">
+        <Image
+          src={getImageUrl(matched?.image_url || match.original_product.image_url)}
+          alt={matched?.name || match.original_product.name}
+          fill
+          className="object-contain p-2"
+        />
+      </div>
+      
+      {/* Product Details */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex-1">
+            {showStore && matched && (
+              <span className={cn('badge mb-1', getStoreBadgeClass(matched.store))}>{matched.store}</span>
+            )}
+            <h4 className="font-semibold text-gray-900 text-sm line-clamp-2">
+              {matched?.name || match.original_product.name}
+            </h4>
+            <div className="flex items-center gap-2 mt-1 text-xs text-gray-500">
+              {matched?.brand && <span>Brand: {matched.brand}</span>}
+              {matched?.size && <span>Size: {matched.size}</span>}
+            </div>
+            
+            {/* Mismatch Indicators */}
+            {match.mismatch_reason && (
+              <div className="mt-2 flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-1 rounded inline-flex">
+                <AlertTriangle className="w-3 h-3" />
+                <span>{match.mismatch_reason}</span>
+              </div>
+            )}
+            
+            {/* Auto-matched indicator */}
+            {!match.mismatch_reason && matched && (
+              <div className="mt-2 flex items-center gap-1 text-xs text-green-700 bg-green-50 px-2 py-1 rounded inline-flex">
+                <CheckCircle2 className="w-3 h-3" />
+                <span>Exact match</span>
+              </div>
+            )}
+            
+            {/* Not available indicator */}
+            {!match.is_available && (
+              <div className="mt-2 flex items-center gap-1 text-xs text-red-700 bg-red-50 px-2 py-1 rounded inline-flex">
+                <AlertCircle className="w-3 h-3" />
+                <span>Not available</span>
+              </div>
+            )}
+          </div>
+          
+          {/* Price */}
+          <div className="text-right">
+            {matched && match.is_available ? (
+              <p className="text-xl font-bold text-gray-900">{matched.price}</p>
+            ) : (
+              <p className="text-sm font-medium text-gray-500">N/A</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function ComparisonPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [comparison, setComparison] = useState<CompareResponse | null>(null);
-  const [filteredComparison, setFilteredComparison] = useState<CompareResponse | null>(null);
   const [sessionId, setSessionId] = useState('');
-  const [approvedAlts, setApprovedAlts] = useState<ApprovedAlternatives>({});
-  const [discardedAlts, setDiscardedAlts] = useState<DiscardedAlternatives>({});
-
-  // Filter comparison data based on approved/discarded alternatives
-  const filterComparison = useCallback((data: CompareResponse): CompareResponse => {
-    // Filter store comparisons
-    const filteredStoreComparisons: StoreComparison[] = data.store_comparisons.map((sc) => {
-      const filteredProducts: ProductMatch[] = sc.products.map((pm) => {
-        if (!pm.matched_product) return pm;
-        
-        const originalId = pm.original_product.id;
-        const matchedId = pm.matched_product.id;
-        const store = sc.store;
-        
-        // Check if this match is discarded
-        const isDiscarded = discardedAlts[originalId]?.includes(matchedId);
-        
-        // Check if this match needs approval but wasn't approved
-        const needsApproval = pm.needs_approval === true;
-        const isApproved = approvedAlts[originalId]?.[store] === matchedId;
-        
-        // If discarded, or needs approval but not approved, mark as unavailable
-        if (isDiscarded || (needsApproval && !isApproved)) {
-          return {
-            ...pm,
-            matched_product: null,
-            is_available: false,
-          };
-        }
-        
-        return pm;
-      });
-      
-      // Recalculate totals
-      let total = 0;
-      let availableCount = 0;
-      let missingCount = 0;
-      
-      for (const pm of filteredProducts) {
-        if (pm.is_available && pm.matched_product) {
-          total += pm.matched_product.price_numeric || 0;
-          availableCount++;
-        } else {
-          missingCount++;
-        }
-      }
-      
-      return {
-        ...sc,
-        products: filteredProducts,
-        total: Math.round(total * 100) / 100,
-        available_count: availableCount,
-        missing_count: missingCount,
-      };
-    });
-    
-    // Recalculate best deal based on filtered data
-    const bestDeal: BestDealItem[] = [];
-    let bestDealTotal = 0;
-    let originalTotal = 0;
-    
-    // Group products by original product ID to find best price across stores
-    const productBestPrices: Map<number, { bestItem: BestDealItem | null; originalPrice: number }> = new Map();
-    
-    // Initialize with original products
-    for (const sc of filteredStoreComparisons) {
-      for (const pm of sc.products) {
-        const originalId = pm.original_product.id;
-        if (!productBestPrices.has(originalId)) {
-          productBestPrices.set(originalId, {
-            bestItem: null,
-            originalPrice: pm.original_product.price_numeric || 0,
-          });
-        }
-        
-        if (pm.is_available && pm.matched_product) {
-          const price = pm.matched_product.price_numeric || 0;
-          const existing = productBestPrices.get(originalId)!;
-          
-          if (!existing.bestItem || price < existing.bestItem.price) {
-            productBestPrices.set(originalId, {
-              ...existing,
-              bestItem: {
-                original_product: pm.original_product,
-                best_product: pm.matched_product,
-                store: sc.store,
-                price: price,
-                savings: Math.max(0, existing.originalPrice - price),
-              },
-            });
-          }
-        }
-      }
-    }
-    
-    // Build best deal list
-    for (const [, value] of productBestPrices) {
-      originalTotal += value.originalPrice;
-      if (value.bestItem) {
-        bestDeal.push(value.bestItem);
-        bestDealTotal += value.bestItem.price;
-      }
-    }
-    
-    return {
-      store_comparisons: filteredStoreComparisons,
-      best_deal: bestDeal,
-      best_deal_total: Math.round(bestDealTotal * 100) / 100,
-      best_deal_savings: Math.round(Math.max(0, originalTotal - bestDealTotal) * 100) / 100,
-    };
-  }, [approvedAlts, discardedAlts]);
 
   const fetchComparison = useCallback(async (sid: string, productIds: number[]) => {
     if (!sid || productIds.length === 0) {
@@ -169,44 +115,16 @@ export default function ConfirmPage() {
     }
   }, []);
 
-  // Apply filtering whenever comparison data or approval state changes
   useEffect(() => {
-    if (comparison) {
-      const filtered = filterComparison(comparison);
-      setFilteredComparison(filtered);
-    }
-  }, [comparison, filterComparison]);
-
-  useEffect(() => {
-    const sid = getOrCreateSessionId();
+    const sid = localStorage.getItem('sessionId') || getOrCreateSessionId();
     setSessionId(sid);
 
     // Get selected items from localStorage
     const stored = localStorage.getItem('selectedCartItems');
     if (!stored) {
-      setError('No items selected for comparison. Please go back and select items.');
+      setError('No items selected for comparison. Please go back and add items to cart.');
       setLoading(false);
       return;
-    }
-
-    // Get approved alternatives from localStorage
-    const approvedStored = localStorage.getItem('approvedAlternatives');
-    if (approvedStored) {
-      try {
-        setApprovedAlts(JSON.parse(approvedStored));
-      } catch {
-        console.error('Failed to parse approved alternatives');
-      }
-    }
-
-    // Get discarded alternatives from localStorage
-    const discardedStored = localStorage.getItem('discardedAlternatives');
-    if (discardedStored) {
-      try {
-        setDiscardedAlts(JSON.parse(discardedStored));
-      } catch {
-        console.error('Failed to parse discarded alternatives');
-      }
     }
 
     try {
@@ -223,23 +141,6 @@ export default function ConfirmPage() {
     }
   }, [fetchComparison]);
 
-  // Find the store with lowest total (with all items available)
-  const getLowestTotalStore = (): string | null => {
-    if (!filteredComparison) return null;
-    let lowestStore: string | null = null;
-    let lowestTotal = Infinity;
-    
-    for (const sc of filteredComparison.store_comparisons) {
-      if (sc.missing_count === 0 && sc.total < lowestTotal) {
-        lowestTotal = sc.total;
-        lowestStore = sc.store;
-      }
-    }
-    return lowestStore;
-  };
-
-  const lowestTotalStore = getLowestTotalStore();
-
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Header */}
@@ -250,12 +151,9 @@ export default function ConfirmPage() {
         >
           <ArrowLeft className="w-5 h-5" />
         </Link>
-        <div className="rounded-full bg-primary-50 p-3 text-primary-600">
-          <ShoppingBag className="w-6 h-6" />
-        </div>
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Price Comparison</h1>
-          <p className="text-gray-600">Compare your selected items across all stores.</p>
+          <p className="text-gray-600">See the best deals from a single store or two stores</p>
         </div>
       </div>
 
@@ -269,244 +167,141 @@ export default function ConfirmPage() {
 
       {/* Error State */}
       {!loading && error && (
-        <div className="card p-6 flex flex-col items-center gap-4 text-center">
-          <AlertCircle className="w-12 h-12 text-red-500" />
+        <div className="card p-6 flex items-start gap-3 text-red-700">
+          <AlertCircle className="w-5 h-5 flex-shrink-0" />
           <div>
-            <p className="font-medium text-red-700">{error}</p>
-            <Link href="/cart" className="text-sm text-primary-600 hover:underline mt-2 inline-block">
-              Back to cart
+            <p className="font-medium">{error}</p>
+            <Link href="/cart" className="text-sm underline mt-2 inline-block">
+              Go back to cart
             </Link>
           </div>
         </div>
       )}
 
       {/* Comparison Results */}
-      {!loading && !error && filteredComparison && (
+      {!loading && !error && comparison && (
         <div className="space-y-8">
-          {/* Store Comparison Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {STORES.map((store) => {
-              const storeData = filteredComparison.store_comparisons.find((sc) => sc.store === store);
-              if (!storeData) return null;
-
-              const isLowest = lowestTotalStore === store;
-
-              return (
-                <div
-                  key={store}
-                  className={cn(
-                    'rounded-xl border-2 overflow-hidden transition-all',
-                    getStoreCardClass(store),
-                    isLowest && 'ring-2 ring-yellow-400 ring-offset-2'
-                  )}
-                >
-                  {/* Store Header */}
-                  <div className={cn('px-4 py-3 flex items-center justify-between', getStoreHeaderClass(store))}>
-                    <h2 className="text-lg font-bold">{store}</h2>
-                    {isLowest && (
-                      <span className="inline-flex items-center gap-1 text-xs font-semibold bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full">
-                        <Star className="w-3 h-3" /> Best Store Price
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Products List */}
-                  <div className="divide-y divide-gray-200">
-                    {storeData.products.map((pm, idx) => (
-                      <div key={idx} className="p-4 flex items-center gap-4">
-                        {pm.is_available && pm.matched_product ? (
-                          <>
-                            <div className="relative w-16 h-16 flex-shrink-0 bg-white rounded-lg overflow-hidden">
-                              <Image
-                                src={getImageUrl(pm.matched_product.image_url)}
-                                alt={pm.matched_product.name}
-                                fill
-                                className="object-contain p-1"
-                              />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              {pm.matched_product.product_url ? (
-                                <a
-                                  href={pm.matched_product.product_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-sm font-medium text-gray-900 truncate block hover:text-primary-600 hover:underline transition-colors"
-                                  title={`View ${pm.matched_product.name} on ${store}`}
-                                >
-                                  {pm.matched_product.name}
-                                </a>
-                              ) : (
-                                <p className="text-sm font-medium text-gray-900 truncate">
-                                  {pm.matched_product.name}
-                                </p>
-                              )}
-                              <p className="text-xs text-gray-500 truncate">
-                                {pm.matched_product.brand || 'Unbranded'}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-lg font-bold text-gray-900">
-                                {pm.matched_product.price}
-                              </p>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-16 h-16 flex-shrink-0 bg-gray-100 rounded-lg flex items-center justify-center">
-                              <XCircle className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm font-medium text-gray-500 truncate">
-                                {pm.original_product.name}
-                              </p>
-                              <p className="text-xs text-red-500">
-                                Not available in this store
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="text-sm text-gray-400">—</p>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Store Total */}
-                  <div className="px-4 py-4 bg-white/50 border-t-2 border-gray-200">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-sm text-gray-600">
-                          {storeData.available_count} of {storeData.products.length} items available
-                        </p>
-                        {storeData.missing_count > 0 && (
-                          <p className="text-xs text-red-500">
-                            {storeData.missing_count} item(s) not found
-                          </p>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-gray-500 uppercase">Total</p>
-                        <p className="text-2xl font-bold text-gray-900">
-                          ${storeData.total.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Best Deal Section */}
-          <div className="card overflow-hidden">
-            <div className="bg-gradient-to-r from-yellow-400 to-orange-400 px-6 py-4">
-              <div className="flex items-center gap-3">
-                <Star className="w-8 h-8 text-yellow-900" />
-                <div>
-                  <h2 className="text-xl font-bold text-yellow-900">Best Deal Combination</h2>
-                  <p className="text-sm text-yellow-800">
-                    Get the lowest price for each item across all stores
-                  </p>
-                </div>
+          {/* Best Single Store Option */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-full bg-blue-100 p-2 text-blue-600">
+                <Store className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Best Single Store</h2>
+                <p className="text-gray-600">Shop everything at one location</p>
               </div>
             </div>
-
-            <div className="p-6">
-              {/* Warning if some products couldn't be matched */}
-              {filteredComparison.best_deal.length < filteredComparison.store_comparisons[0]?.products.length && (
-                <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <div className="text-sm text-amber-800">
-                    <p className="font-medium">Some products couldn&apos;t be matched</p>
-                    <p className="mt-1">
-                      {filteredComparison.store_comparisons[0]?.products.length - filteredComparison.best_deal.length} product(s) 
-                      had no approved matches and are excluded from the best deal calculation.
+            
+            <div className="card overflow-hidden">
+              <div className={cn('px-6 py-4', getStoreHeaderClass(comparison.best_single_store.store))}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">{comparison.best_single_store.store}</h3>
+                    <p className="text-sm opacity-90">
+                      {comparison.best_single_store.available_count} items available
+                      {comparison.best_single_store.missing_count > 0 && 
+                        `, ${comparison.best_single_store.missing_count} unavailable`
+                      }
                     </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Best Deal Items */}
-              <div className="divide-y divide-gray-100">
-                {filteredComparison.best_deal.map((item, idx) => (
-                  <div key={idx} className="py-4 flex items-center gap-4">
-                    <div className="relative w-16 h-16 flex-shrink-0 bg-gray-50 rounded-lg overflow-hidden">
-                      <Image
-                        src={getImageUrl(item.best_product.image_url)}
-                        alt={item.best_product.name}
-                        fill
-                        className="object-contain p-1"
-                      />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      {item.best_product.product_url ? (
-                        <a
-                          href={item.best_product.product_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-gray-900 truncate block hover:text-primary-600 hover:underline transition-colors"
-                          title={`View ${item.best_product.name} on ${item.store}`}
-                        >
-                          {item.best_product.name}
-                        </a>
-                      ) : (
-                        <p className="text-sm font-medium text-gray-900 truncate">
-                          {item.best_product.name}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-500 truncate">
-                        {item.best_product.brand || 'Unbranded'}
-                      </p>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className={cn('badge', getStoreBadgeClass(item.store))}>
-                        {item.store}
-                      </span>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-gray-900">
-                          ${item.price.toFixed(2)}
-                        </p>
-                        {item.savings > 0 && (
-                          <p className="text-xs text-green-600 font-medium">
-                            Save ${item.savings.toFixed(2)}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* Best Deal Summary */}
-              <div className="mt-6 pt-6 border-t-2 border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                  <div className="flex items-center gap-2 text-green-600">
-                    <CheckCircle2 className="w-6 h-6" />
-                    <div>
-                      <p className="font-semibold">Total Savings</p>
-                      <p className="text-2xl font-bold">${filteredComparison.best_deal_savings.toFixed(2)}</p>
-                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500 uppercase">Best Deal Total</p>
-                    <p className="text-3xl font-bold text-gray-900">
-                      ${filteredComparison.best_deal_total.toFixed(2)}
-                    </p>
+                    <p className="text-3xl font-bold">${comparison.best_single_store.total.toFixed(2)}</p>
+                    <p className="text-sm opacity-90">Total</p>
                   </div>
                 </div>
               </div>
+              
+              <div className="p-6 space-y-3">
+                {comparison.best_single_store.products.map((match, idx) => (
+                  <ProductMatchCard key={idx} match={match} />
+                ))}
+              </div>
             </div>
-          </div>
+          </section>
 
-          {/* Back to Cart */}
-          <div className="flex justify-center">
-            <Link
-              href="/cart"
-              className="inline-flex items-center gap-2 text-gray-600 hover:text-gray-900"
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Back to cart
+          {/* Best Two-Store Option */}
+          <section>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="rounded-full bg-purple-100 p-2 text-purple-600">
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Best Two-Store Combination</h2>
+                <p className="text-gray-600">Get the lowest prices by shopping at two stores</p>
+              </div>
+            </div>
+            
+            <div className="card overflow-hidden">
+              <div className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white px-6 py-4">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold">
+                      {comparison.best_two_stores.stores.join(' + ')}
+                    </h3>
+                    <p className="text-sm opacity-90">
+                      {comparison.best_two_stores.available_count} items available
+                      {comparison.best_two_stores.missing_count > 0 && 
+                        `, ${comparison.best_two_stores.missing_count} unavailable`
+                      }
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-3xl font-bold">${comparison.best_two_stores.total.toFixed(2)}</p>
+                    <p className="text-sm opacity-90">Total</p>
+                    {comparison.best_two_stores.total < comparison.best_single_store.total && (
+                      <p className="text-xs mt-1 bg-white/20 px-2 py-0.5 rounded">
+                        Save ${(comparison.best_single_store.total - comparison.best_two_stores.total).toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              
+              <div className="p-6 space-y-3">
+                {comparison.best_two_stores.products.map((match, idx) => (
+                  <ProductMatchCard key={idx} match={match} showStore={true} />
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* Summary */}
+          <section className="card p-6 bg-gradient-to-br from-green-50 to-blue-50 border-2 border-green-200">
+            <div className="flex items-start gap-4">
+              <div className="rounded-full bg-green-600 p-3 text-white">
+                <CheckCircle2 className="w-6 h-6" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Summary</h3>
+                <div className="space-y-1 text-sm text-gray-700">
+                  <p>
+                    <strong>Single Store ({comparison.best_single_store.store}):</strong> ${comparison.best_single_store.total.toFixed(2)}
+                  </p>
+                  <p>
+                    <strong>Two Stores ({comparison.best_two_stores.stores.join(' + ')}):</strong> ${comparison.best_two_stores.total.toFixed(2)}
+                  </p>
+                  {comparison.best_two_stores.total < comparison.best_single_store.total ? (
+                    <p className="text-green-700 font-semibold">
+                      💰 You save ${(comparison.best_single_store.total - comparison.best_two_stores.total).toFixed(2)} by shopping at two stores!
+                    </p>
+                  ) : (
+                    <p className="text-blue-700 font-semibold">
+                      ✨ Shopping at one store is your best value!
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Actions */}
+          <div className="flex justify-center gap-4">
+            <Link href="/cart" className="btn-secondary">
+              Back to Cart
+            </Link>
+            <Link href="/" className="btn-primary">
+              Continue Shopping
             </Link>
           </div>
         </div>

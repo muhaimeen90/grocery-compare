@@ -79,6 +79,7 @@ export interface ProductMatch {
   brand_matched?: boolean;
   is_fallback?: boolean;
   fallback_type?: 'same_brand_diff_size' | 'same_size_diff_brand' | null;
+  mismatch_reason?: string | null;
 }
 
 export interface StoreComparison {
@@ -95,6 +96,23 @@ export interface BestDealItem {
   store: string;
   price: number;
   savings: number;
+  mismatch_reason?: string | null;
+}
+
+export interface SingleStoreOption {
+  store: string;
+  products: ProductMatch[];
+  total: number;
+  available_count: number;
+  missing_count: number;
+}
+
+export interface TwoStoreOption {
+  stores: string[];
+  products: ProductMatch[];
+  total: number;
+  available_count: number;
+  missing_count: number;
 }
 
 export interface CompareResponse {
@@ -102,4 +120,6 @@ export interface CompareResponse {
   best_deal: BestDealItem[];
   best_deal_total: number;
   best_deal_savings: number;
+  best_single_store: SingleStoreOption;
+  best_two_stores: TwoStoreOption;
 }

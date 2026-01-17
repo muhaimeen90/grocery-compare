@@ -17,6 +17,8 @@ from ..schemas import (
     StoreComparison,
     ProductMatch,
     BestDealItem,
+    SingleStoreOption,
+    TwoStoreOption,
 )
 from ..services.vector_search_service import get_vector_search_service
 
@@ -249,6 +251,16 @@ def compare_cart_items(
                 price = matched.price_numeric or 0.0
                 store_total += price
                 available_count += 1
+                
+                # Determine mismatch reason
+                mismatch_reason = None
+                if not meta.get('size_matched', True) and not meta.get('brand_matched', True):
+                    mismatch_reason = "Brand and size differ"
+                elif not meta.get('size_matched', True):
+                    mismatch_reason = "Size differs"
+                elif not meta.get('brand_matched', True):
+                    mismatch_reason = "Brand differs"
+                
                 store_products.append(ProductMatch(
                     original_product=original_schema,
                     matched_product=matched_schema,
@@ -259,6 +271,7 @@ def compare_cart_items(
                     brand_matched=meta.get('brand_matched', True),
                     is_fallback=meta.get('is_fallback', False),
                     fallback_type=meta.get('fallback_type'),
+                    mismatch_reason=mismatch_reason,
                 ))
             else:
                 missing_count += 1
@@ -304,19 +317,124 @@ def compare_cart_items(
             savings = max(0, original_price - best_price)
             best_deal_total += best_price
             
+            # Get metadata for mismatch reason
+            best_meta = store_map.get(best_store, (None, {}))[1]
+            mismatch_reason = None
+            if not best_meta.get('size_matched', True) and not best_meta.get('brand_matched', True):
+                mismatch_reason = "Brand and size differ"
+            elif not best_meta.get('size_matched', True):
+                mismatch_reason = "Size differs"
+            elif not best_meta.get('brand_matched', True):
+                mismatch_reason = "Brand differs"
+            
             best_deal_items.append(BestDealItem(
                 original_product=original_schema,
                 best_product=best_schema,
                 store=best_store,
                 price=round(best_price, 2),
                 savings=round(savings, 2),
+                mismatch_reason=mismatch_reason,
             ))
 
     total_savings = max(0, original_total - best_deal_total)
+    
+    # Calculate best single store (cheapest store with all available items)
+    best_single_store = min(store_comparisons, key=lambda x: x.total)
+    
+    # Calculate best two-store combination
+    # Try all pairs of stores and find the cheapest combination
+    from itertools import combinations
+    
+    best_two_store_total = float('inf')
+    best_two_store_stores = []
+    best_two_store_products = []
+    
+    for store1, store2 in combinations(STORES, 2):
+        two_store_products: List[ProductMatch] = []
+        two_store_total = 0.0
+        two_store_available = 0
+        two_store_missing = 0
+        
+        for product_id, store_map in product_store_map.items():
+            original = original_products[product_id]
+            original_schema = ProductSchema.model_validate(original, from_attributes=True)
+            
+            # Find cheapest option between the two stores
+            best_in_pair = None
+            best_price_in_pair = float('inf')
+            best_store_in_pair = ""
+            best_meta_in_pair = {}
+            
+            for store in [store1, store2]:
+                if store in store_map:
+                    prod, meta = store_map[store]
+                    price = prod.price_numeric or float('inf')
+                    if price < best_price_in_pair:
+                        best_price_in_pair = price
+                        best_in_pair = prod
+                        best_store_in_pair = store
+                        best_meta_in_pair = meta
+            
+            if best_in_pair:
+                matched_schema = ProductSchema.model_validate(best_in_pair, from_attributes=True)
+                two_store_total += best_price_in_pair
+                two_store_available += 1
+                
+                # Determine mismatch reason
+                mismatch_reason = None
+                if not best_meta_in_pair.get('size_matched', True) and not best_meta_in_pair.get('brand_matched', True):
+                    mismatch_reason = "Brand and size differ"
+                elif not best_meta_in_pair.get('size_matched', True):
+                    mismatch_reason = "Size differs"
+                elif not best_meta_in_pair.get('brand_matched', True):
+                    mismatch_reason = "Brand differs"
+                
+                two_store_products.append(ProductMatch(
+                    original_product=original_schema,
+                    matched_product=matched_schema,
+                    is_available=True,
+                    similarity_score=best_meta_in_pair.get('identical_score'),
+                    needs_approval=best_meta_in_pair.get('needs_approval', False),
+                    size_matched=best_meta_in_pair.get('size_matched', True),
+                    brand_matched=best_meta_in_pair.get('brand_matched', True),
+                    is_fallback=best_meta_in_pair.get('is_fallback', False),
+                    fallback_type=best_meta_in_pair.get('fallback_type'),
+                    mismatch_reason=mismatch_reason,
+                ))
+            else:
+                two_store_missing += 1
+                two_store_products.append(ProductMatch(
+                    original_product=original_schema,
+                    matched_product=None,
+                    is_available=False,
+                ))
+        
+        # Check if this pair is better than the current best
+        if two_store_total < best_two_store_total:
+            best_two_store_total = two_store_total
+            best_two_store_stores = [store1, store2]
+            best_two_store_products = two_store_products
+    
+    # Build the best two-store option
+    best_two_stores_option = TwoStoreOption(
+        stores=best_two_store_stores,
+        products=best_two_store_products,
+        total=round(best_two_store_total, 2),
+        available_count=sum(1 for p in best_two_store_products if p.is_available),
+        missing_count=sum(1 for p in best_two_store_products if not p.is_available),
+    )
     
     return CompareResponse(
         store_comparisons=store_comparisons,
         best_deal=best_deal_items,
         best_deal_total=round(best_deal_total, 2),
         best_deal_savings=round(total_savings, 2),
+        best_single_store=SingleStoreOption(
+            store=best_single_store.store,
+            products=best_single_store.products,
+            total=best_single_store.total,
+            available_count=best_single_store.available_count,
+            missing_count=best_single_store.missing_count,
+        ),
+        best_two_stores=best_two_stores_option,
     )

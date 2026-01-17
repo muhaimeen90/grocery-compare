@@ -152,6 +152,7 @@ class ProductMatch(BaseModel):
     brand_matched: bool = False  # True if brand exactly matches original
     is_fallback: bool = False  # True if this is a fallback alternative (not primary match)
     fallback_type: Optional[str] = None  # Type: 'same_brand_diff_size' or 'same_size_diff_brand'
+    mismatch_reason: Optional[str] = None  # Human-readable reason for mismatch (e.g., "Brand differs", "Size differs")
 
 
 class StoreComparison(BaseModel):
@@ -170,6 +171,25 @@ class BestDealItem(BaseModel):
     store: str
     price: float
     savings: float = 0.0  # Savings compared to original
+    mismatch_reason: Optional[str] = None  # Reason for mismatch if substitute used
+
+
+class SingleStoreOption(BaseModel):
+    """Best single-store shopping option"""
+    store: str
+    products: List[ProductMatch]
+    total: float
+    available_count: int
+    missing_count: int
+
+
+class TwoStoreOption(BaseModel):
+    """Best two-store combination shopping option"""
+    stores: List[str]  # Two store names
+    products: List[ProductMatch]  # Each product shows which store it comes from
+    total: float
+    available_count: int
+    missing_count: int
 
 
 class CompareResponse(BaseModel):
@@ -178,3 +198,5 @@ class CompareResponse(BaseModel):
     best_deal: List[BestDealItem]
     best_deal_total: float
     best_deal_savings: float
+    best_single_store: SingleStoreOption
+    best_two_stores: TwoStoreOption
