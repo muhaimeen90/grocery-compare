@@ -3,10 +3,11 @@
 import { useScraping } from '@/hooks/useScraping';
 import { RefreshCw, Check, AlertCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { Product } from '@/lib/types';
 
 interface PriceUpdateButtonProps {
   productId: number;
-  onSuccess?: () => void;
+  onSuccess?: (product: Product) => void;
   compact?: boolean;
 }
 
@@ -14,9 +15,9 @@ export default function PriceUpdateButton({ productId, onSuccess, compact = fals
   const { scraping, status, error, startScrape } = useScraping(productId);
 
   const handleClick = async () => {
-    await startScrape();
-    if (status?.status === 'success' && onSuccess) {
-      onSuccess();
+    const updatedProduct = await startScrape();
+    if (updatedProduct && onSuccess) {
+      onSuccess(updatedProduct);
     }
   };
 

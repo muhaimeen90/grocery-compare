@@ -6,7 +6,7 @@ import { Package } from 'lucide-react';
 
 interface ProductGridProps {
   products: Product[];
-  onPriceUpdate?: () => void;
+  onPriceUpdate?: (product: Product) => void;
 }
 
 export default function ProductGrid({ products, onPriceUpdate }: ProductGridProps) {

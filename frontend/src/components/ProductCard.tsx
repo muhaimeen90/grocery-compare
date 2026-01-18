@@ -10,7 +10,7 @@ import { apiClient } from '@/lib/api';
 
 interface ProductCardProps {
   product: Product;
-  onPriceUpdate?: () => void;
+  onPriceUpdate?: (product: Product) => void;
 }
 
 export default function ProductCard({ product, onPriceUpdate }: ProductCardProps) {
@@ -89,18 +89,13 @@ export default function ProductCard({ product, onPriceUpdate }: ProductCardProps
         {/* Category - Optional, maybe hide to save space or keep small */}
         {/* <p className="text-xs text-gray-500 mb-3">{product.category}</p> */}
 
-        {/* Price & Date */}
+        {/* Price */}
         <div className="mt-auto">
           <div className="flex items-baseline justify-between">
             <span className="text-xl font-bold text-gray-900">
               {product.price}
             </span>
           </div>
-          {product.last_scraped && (
-            <p className="text-[10px] text-gray-400 mt-1">
-              Updated {formatDate(product.last_scraped)}
-            </p>
-          )}
         </div>
 
         {/* Actions */}

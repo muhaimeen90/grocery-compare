@@ -18,6 +18,7 @@ export default function Home() {
     filters,
     updateFilters,
     refetch,
+    updateProduct,
   } = useProducts({ limit: 24, page: 1 });
 
   const handleStoreChange = (store?: string) => {
@@ -98,7 +99,7 @@ export default function Home() {
               )}
             </div>
 
-            <ProductGrid products={products} onPriceUpdate={refetch} />
+            <ProductGrid products={products} onPriceUpdate={updateProduct} />
 
             {pages > 1 && (
               <div className="mt-8">

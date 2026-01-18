@@ -34,6 +34,7 @@ export interface ScrapeStatus {
   message?: string;
   product_id?: number;
   completed_at?: string;
+  product?: Product;
 }
 
 export interface FilterOptions {

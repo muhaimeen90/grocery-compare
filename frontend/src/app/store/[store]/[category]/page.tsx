@@ -39,6 +39,7 @@ export default function CategoryPage() {
     filters,
     updateFilters,
     refetch,
+    updateProduct,
   } = useProducts(initialFilters);
 
   const updateQueryParams = (
@@ -128,7 +129,7 @@ export default function CategoryPage() {
 
           {!loading && !error && (
             <>
-              <ProductGrid products={products} onPriceUpdate={refetch} />
+              <ProductGrid products={products} onPriceUpdate={updateProduct} />
               
               {pages > 1 && (
                 <div className="mt-8">

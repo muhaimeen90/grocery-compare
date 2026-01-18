@@ -36,6 +36,21 @@ export function useProducts(initialFilters: FilterOptions = {}) {
     setFilters(initialFilters);
   };
 
+  const updateProduct = useCallback((updatedProduct: ProductList['products'][0]) => {
+    setData((prevData) => {
+      if (!prevData) return prevData;
+      
+      const updatedProducts = prevData.products.map((product) =>
+        product.id === updatedProduct.id ? updatedProduct : product
+      );
+      
+      return {
+        ...prevData,
+        products: updatedProducts,
+      };
+    });
+  }, []);
+
   return {
     products: data?.products || [],
     total: data?.total || 0,
@@ -47,5 +62,6 @@ export function useProducts(initialFilters: FilterOptions = {}) {
     updateFilters,
     resetFilters,
     refetch: fetchProducts,
+    updateProduct,
   };
 }

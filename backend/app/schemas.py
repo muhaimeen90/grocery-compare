@@ -76,6 +76,7 @@ class ScrapeStatus(BaseModel):
     message: Optional[str] = None
     product_id: Optional[int] = None
     completed_at: Optional[datetime] = None
+    product: Optional[Product] = None  # Full product data on success
 
 
 class CartBase(BaseModel):

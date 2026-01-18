@@ -166,6 +166,11 @@ async def scrape_and_update_price(
                     product.last_scraped = datetime.utcnow()
                     product.updated_at = datetime.utcnow()
                     db.commit()
+                    db.refresh(product)
+                    
+                    # Convert product to dict for JSON serialization
+                    from ..schemas import Product as ProductSchema
+                    product_dict = ProductSchema.from_orm(product).dict()
                     
                     task_results[task_id] = {
                         'task_id': task_id,
@@ -173,7 +178,8 @@ async def scrape_and_update_price(
                         'price': result['price'],
                         'product_id': product_id,
                         'message': 'Price updated successfully',
-                        'completed_at': datetime.utcnow()
+                        'completed_at': datetime.utcnow(),
+                        'product': product_dict
                     }
                 else:
                     task_results[task_id] = {
