@@ -26,6 +26,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'cdn.metcash.media',
       },
+      {
+        protocol: 'https',
+        hostname: '**.aldi.com.au',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.aldi.com.au',
+      },
     ],
   },
   async rewrites() {

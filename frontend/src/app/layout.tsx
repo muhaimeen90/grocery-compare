@@ -1,13 +1,14 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+import 'leaflet/dist/leaflet.css';
 import Navbar from '@/components/Navbar';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
   title: 'Grocery Price Comparison',
-  description: 'Compare prices across IGA, Woolworths, and Coles',
+  description: 'Compare prices across IGA, Woolworths, Coles, and Aldi',
 };
 
 export default function RootLayout({

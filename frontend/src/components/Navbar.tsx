@@ -10,7 +10,7 @@ export default function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
 
-  const stores = ['IGA', 'Woolworths', 'Coles'];
+  const stores = ['IGA', 'Woolworths', 'Coles', 'Aldi'];
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();

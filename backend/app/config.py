@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     DEBUG: bool = False  # Set to False in production
     
     # Database
-    DATABASE_URL: str = "sqlite:///./data/grocery_prices.db"
+    DATABASE_URL: str = "postgresql://grocery_user:grocery_password@localhost:5432/grocery_db"
     
     # CORS
     CORS_ORIGINS: Union[list, str] = [

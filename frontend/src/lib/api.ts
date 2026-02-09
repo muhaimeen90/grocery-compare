@@ -8,6 +8,8 @@ import type {
   CartItem,
   CartItemWithAlternatives,
   CompareResponse,
+  Location,
+  NearbyLocationsResponse,
 } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -104,6 +106,49 @@ export const apiClient = {
       product_ids: productIds,
       session_id: sessionId,
     });
+    return data;
+  },
+
+  // Locations
+  async getNearbyLocations(
+    lat: number,
+    lng: number,
+    radiusKm: number = 50,
+    limit: number = 20,
+    storeName?: string
+  ): Promise<NearbyLocationsResponse> {
+    const params = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      radius_km: radiusKm.toString(),
+      limit: limit.toString(),
+    });
+    
+    if (storeName) {
+      params.append('store_name', storeName);
+    }
+    
+    const { data } = await api.get<NearbyLocationsResponse>('/api/locations/nearby', { params });
+    return data;
+  },
+
+  async getNearestByStore(
+    lat: number,
+    lng: number,
+    radiusKm: number = 50
+  ): Promise<Location[]> {
+    const params = new URLSearchParams({
+      lat: lat.toString(),
+      lng: lng.toString(),
+      radius_km: radiusKm.toString(),
+    });
+    
+    const { data } = await api.get<Location[]>('/api/locations/nearest-by-store', { params });
+    return data;
+  },
+
+  async getLocation(locationId: number): Promise<Location> {
+    const { data } = await api.get<Location>(`/api/locations/${locationId}`);
     return data;
   },
 };

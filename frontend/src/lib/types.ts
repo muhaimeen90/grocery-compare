@@ -124,3 +124,40 @@ export interface CompareResponse {
   best_single_store: SingleStoreOption;
   best_two_stores: TwoStoreOption;
 }
+
+// Location Types
+export interface Store {
+  id: number;
+  name: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Location {
+  id: number;
+  store_id: number;
+  external_store_id: string | null;
+  name: string;
+  address: string | null;
+  suburb: string | null;
+  state: string | null;
+  postcode: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  phone: string | null;
+  opening_hours: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  store: Store;
+  distance_km?: number;
+}
+
+export interface NearbyLocationsResponse {
+  locations: Location[];
+  search_point: {
+    lat: number;
+    lng: number;
+  };
+  total: number;
+}

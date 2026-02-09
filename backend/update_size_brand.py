@@ -54,7 +54,7 @@ def clean_category_name(category: str) -> str:
     """
     import re
     # Remove store prefix
-    category = re.sub(r'^(iga_|woolworths_|coles_)', '', category, flags=re.IGNORECASE)
+    category = re.sub(r'^(iga_|woolworths_|coles_|aldi_)', '', category, flags=re.IGNORECASE)
     
     # Replace underscores with spaces
     category = category.replace('_', ' ')
@@ -227,7 +227,8 @@ def main():
     stores_config = {
         'IGA': 'IGA',
         'Woolworths': 'Woolworths',
-        'Coles': 'Coles'
+        'Coles': 'Coles',
+        'Aldi': 'Aldi'
     }
     
     db = SessionLocal()

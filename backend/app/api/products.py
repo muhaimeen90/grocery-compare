@@ -2,11 +2,11 @@
 Product API Endpoints
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, or_, distinct
 from typing import Optional, List
 from ..database import get_db
-from ..models import Product as ProductModel
+from ..models import Product as ProductModel, Store as StoreModel
 from ..schemas import Product, ProductList, CategoryCount
 from ..services.vector_search_service import get_vector_search_service
 from ..utils.ranking_utils import rank_search_results
@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api/products", tags=["products"])
 
 @router.get("", response_model=ProductList)
 def get_products(
-    store: Optional[str] = Query(None, description="Filter by store (IGA, Woolworths, Coles)"),
+    store: Optional[str] = Query(None, description="Filter by store (IGA, Woolworths, Coles, Aldi)"),
     category: Optional[str] = Query(None, description="Filter by category"),
     search: Optional[str] = Query(None, description="Search in product name and brand"),
     brand: Optional[str] = Query(None, description="Filter by brand"),
@@ -116,11 +116,13 @@ def _semantic_search_products(
     product_ids = [result.get('product_id') or result.get('id') for result in vector_results]
     
     # Fetch full product details from database to ensure data consistency
-    query = db.query(ProductModel).filter(ProductModel.id.in_(product_ids))
+    query = db.query(ProductModel).options(joinedload(ProductModel.store_rel)).filter(ProductModel.id.in_(product_ids))
     
     # Apply additional filters that might not be in vector results
     if store:
-        query = query.filter(ProductModel.store == store)
+        store_obj = db.query(StoreModel).filter(func.lower(StoreModel.name) == func.lower(store)).first()
+        if store_obj:
+            query = query.filter(ProductModel.store_id == store_obj.id)
     if category:
         query = query.filter(ProductModel.category == category)
     if brand:
@@ -185,12 +187,17 @@ def _database_query_products(
     """
     Traditional database query for products (fallback or non-search queries)
     """
-    # Start with base query
-    query = db.query(ProductModel)
+    # Start with base query and eager load store relationship
+    query = db.query(ProductModel).options(joinedload(ProductModel.store_rel))
     
-    # Apply filters
+    # Apply store filter by name (convert to store_id)
     if store:
-        query = query.filter(ProductModel.store == store)
+        store_obj = db.query(StoreModel).filter(func.lower(StoreModel.name) == func.lower(store)).first()
+        if store_obj:
+            query = query.filter(ProductModel.store_id == store_obj.id)
+        else:
+            # Store not found, return empty result
+            return ProductList(products=[], total=0, page=page, pages=0, limit=limit)
     
     if category:
         query = query.filter(ProductModel.category == category)
@@ -240,7 +247,7 @@ def get_product(
     """
     Get a single product by ID
     """
-    product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+    product = db.query(ProductModel).options(joinedload(ProductModel.store_rel)).filter(ProductModel.id == product_id).first()
     
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -253,8 +260,8 @@ def get_stores(db: Session = Depends(get_db)):
     """
     Get list of all available stores
     """
-    stores = db.query(distinct(ProductModel.store)).all()
-    return [store[0] for store in stores if store[0]]
+    stores = db.query(StoreModel.name).order_by(StoreModel.name).all()
+    return [store[0] for store in stores]
 
 
 @router.get("/categories/list", response_model=List[CategoryCount])
@@ -271,7 +278,9 @@ def get_categories(
     )
     
     if store:
-        query = query.filter(ProductModel.store == store)
+        store_obj = db.query(StoreModel).filter(func.lower(StoreModel.name) == func.lower(store)).first()
+        if store_obj:
+            query = query.filter(ProductModel.store_id == store_obj.id)
     
     categories = query.group_by(ProductModel.category).order_by(ProductModel.category).all()
     
@@ -293,7 +302,9 @@ def get_brands(
     query = db.query(distinct(ProductModel.brand))
     
     if store:
-        query = query.filter(ProductModel.store == store)
+        store_obj = db.query(StoreModel).filter(func.lower(StoreModel.name) == func.lower(store)).first()
+        if store_obj:
+            query = query.filter(ProductModel.store_id == store_obj.id)
     
     if category:
         query = query.filter(ProductModel.category == category)

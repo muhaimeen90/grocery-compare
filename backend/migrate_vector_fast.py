@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fast SQLite to Pinecone Vector Migration Script
+Fast PostgreSQL to Pinecone Vector Migration Script
 
 This script uses upsert to handle duplicates automatically.
 No existence checking - just encode and upload everything in parallel.
@@ -58,9 +58,10 @@ def init_pinecone(api_key: str, index_name: str = "grocery-hybrid") -> Pinecone:
 
 
 def get_all_products(db_session) -> List[Product]:
-    """Fetch all products from SQLite database"""
-    print("📊 Fetching products from SQLite...")
-    products = db_session.query(Product).all()
+    """Fetch all products from PostgreSQL database with store relationship"""
+    from sqlalchemy.orm import joinedload
+    print("📊 Fetching products from PostgreSQL...")
+    products = db_session.query(Product).options(joinedload(Product.store_rel)).all()
     print(f"✅ Found {len(products):,} products in database")
     return products
 
@@ -100,7 +101,7 @@ def process_chunk(products_chunk: List[Product], model: SentenceTransformer,
             "brand": product.brand or "",
             "size": product.size or "",
             "category": product.category,
-            "store": product.store,
+            "store": product.store_rel.name if product.store_rel else "Unknown",
             "product_url": product.product_url or "",
             "image_url": product.image_url or "",
         }
@@ -139,7 +140,7 @@ def process_chunk(products_chunk: List[Product], model: SentenceTransformer,
 def main():
     """Main migration function"""
     print("=" * 80)
-    print("🚀 Fast SQLite to Pinecone Migration (No Duplicate Checking)")
+    print("🚀 Fast PostgreSQL to Pinecone Migration (No Duplicate Checking)")
     print("   Using upsert - automatically overwrites existing vectors")
     print("=" * 80)
     

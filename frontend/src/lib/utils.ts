@@ -11,6 +11,7 @@ export function getStoreBadgeClass(store: string): string {
   if (storeLower === 'iga') return 'badge-iga';
   if (storeLower === 'woolworths') return 'badge-woolworths';
   if (storeLower === 'coles') return 'badge-coles';
+  if (storeLower === 'aldi') return 'badge-aldi';
   
   return 'bg-gray-100 text-gray-800';
 }

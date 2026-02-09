@@ -1,7 +1,7 @@
 """Cart API Endpoints"""
 from typing import List, Dict
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from ..database import get_db
 from ..models import Cart as CartModel, CartItem as CartItemModel, Product as ProductModel
@@ -24,7 +24,7 @@ from ..services.vector_search_service import get_vector_search_service
 
 router = APIRouter(prefix="/api/v1/cart", tags=["cart"])
 
-STORES = ["IGA", "Woolworths", "Coles"]
+STORES = ["IGA", "Woolworths", "Coles", "Aldi"]
 
 
 def _get_or_create_cart(session_id: str, db: Session) -> CartModel:
@@ -42,7 +42,7 @@ def _get_or_create_cart(session_id: str, db: Session) -> CartModel:
 @router.post("/items", response_model=CartItemSchema, status_code=status.HTTP_201_CREATED)
 def add_cart_item(payload: CartItemCreate, db: Session = Depends(get_db)) -> CartItemSchema:
     """Add or increment a cart item for the provided session"""
-    product = db.query(ProductModel).filter(ProductModel.id == payload.product_id).first()
+    product = db.query(ProductModel).options(joinedload(ProductModel.store_rel)).filter(ProductModel.id == payload.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
 
@@ -106,6 +106,7 @@ def get_cart(session_id: str, db: Session = Depends(get_db)) -> List[CartItemWit
         if alt_ids:
             alternatives = (
                 db.query(ProductModel)
+                .options(joinedload(ProductModel.store_rel))
                 .filter(ProductModel.id.in_(alt_ids))
                 .all()
             )
@@ -185,6 +186,7 @@ def compare_cart_items(
     # Fetch selected products
     products = (
         db.query(ProductModel)
+        .options(joinedload(ProductModel.store_rel))
         .filter(ProductModel.id.in_(payload.product_ids))
         .all()
     )
@@ -203,8 +205,9 @@ def compare_cart_items(
     
     for product in products:
         # Original product doesn't need approval
+        store_name = product.store_rel.name if product.store_rel else "Unknown"
         product_store_map[product.id] = {
-            product.store: (product, {
+            store_name: (product, {
                 'needs_approval': False,
                 'size_matched': True,
                 'brand_matched': True,
@@ -217,20 +220,33 @@ def compare_cart_items(
             similar_meta = vector_service.find_identical_products(product.id, db)
             similar_ids = [m.get("product_id") for m in similar_meta if m.get("product_id")]
             
+            print(f"\n🔍 DEBUG: Product {product.id}")
+            print(f"  Similar IDs from vector search: {similar_ids}")
+            
             # Create a map of product_id to metadata
             meta_map = {m.get("product_id"): m for m in similar_meta if m.get("product_id")}
             
             if similar_ids:
                 similar_products = (
                     db.query(ProductModel)
+                    .options(joinedload(ProductModel.store_rel))
                     .filter(ProductModel.id.in_(similar_ids))
                     .all()
                 )
+                print(f"  Products fetched from DB: {len(similar_products)}")
+                for sp in similar_products:
+                    store_name = sp.store_rel.name if sp.store_rel else "Unknown"
+                    print(f"    - ID {sp.id}: {sp.name[:40]} ({store_name})")
+                
                 for sim_product in similar_products:
+                    sim_store_name = sim_product.store_rel.name if sim_product.store_rel else "Unknown"
                     # Only add if we don't have this store yet
-                    if sim_product.store not in product_store_map[product.id]:
+                    if sim_store_name not in product_store_map[product.id]:
                         meta = meta_map.get(sim_product.id, {})
-                        product_store_map[product.id][sim_product.store] = (sim_product, meta)
+                        product_store_map[product.id][sim_store_name] = (sim_product, meta)
+                        print(f"    ✅ Added {sim_store_name} to map")
+                    else:
+                        print(f"    ⏭️  {sim_store_name} already in map")
 
     # Build store comparisons
     store_comparisons: List[StoreComparison] = []

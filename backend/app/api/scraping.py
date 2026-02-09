@@ -2,7 +2,7 @@
 Price Scraping API Endpoints
 """
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from typing import Dict
 from datetime import datetime
 import uuid
@@ -28,8 +28,8 @@ async def scrape_price(
     """
     Scrape live price for a single product
     """
-    # Verify product exists
-    product = db.query(ProductModel).filter(ProductModel.id == request.product_id).first()
+    # Verify product exists and load store relationship
+    product = db.query(ProductModel).options(joinedload(ProductModel.store_rel)).filter(ProductModel.id == request.product_id).first()
     
     if not product:
         raise HTTPException(status_code=404, detail="Product not found")
@@ -48,13 +48,16 @@ async def scrape_price(
         'message': 'Scraping queued'
     }
     
+    # Get store name from relationship
+    store_name = product.store_rel.name if product.store_rel else "Unknown"
+    
     # Add background task
     background_tasks.add_task(
         scrape_and_update_price,
         task_id=task_id,
         product_id=request.product_id,
         product_url=product.product_url,
-        store=product.store
+        store=store_name
     )
     
     return ScrapeResponse(

@@ -46,7 +46,7 @@ export default function Home() {
           Discover the best grocery deals today
         </h1>
         <p className="text-gray-600">
-          Browsing {total} products across IGA, Woolworths, and Coles. Use the filters to zero in on the
+          Browsing {total} products across IGA, Woolworths, Coles, and Aldi. Use the filters to zero in on the
           perfect items for your basket.
         </p>
       </div>

@@ -2406,3 +2406,647 @@ Error: Failed to find Server Action "x". This request might be from an older or 
     at AsyncLocalStorage.run (node:async_hooks:338:14)
     at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
     at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 163ms
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 151ms
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+Error: Failed to find Server Action "x". This request might be from an older or newer deployment. 
+    at r$ (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:17:1667)
+    at rE (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:15:6522)
+    at no (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:19:1150)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:726
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:17831)
+    at /home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:616
+    at AsyncLocalStorage.run (node:async_hooks:338:14)
+    at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
+    at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 144ms
+Failed to proxy http://72.62.70.246:8000/api/products/categories/list Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products/stores/list Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 248ms
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 108ms
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 132ms
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products/categories/list Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products/stores/list Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Failed to proxy http://72.62.70.246:8000/api/products?page=1&limit=24 Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}
+Error: connect ECONNREFUSED 72.62.70.246:8000
+    at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1549:16)
+    at TCPConnectWrap.callbackTrampoline (node:internal/async_hooks:128:17) {
+  errno: -111,
+  code: 'ECONNREFUSED',
+  syscall: 'connect',
+  address: '72.62.70.246',
+  port: 8000
+}

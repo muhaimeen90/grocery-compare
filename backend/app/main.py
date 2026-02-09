@@ -7,7 +7,7 @@ from contextlib import asynccontextmanager
 
 from .config import settings
 from .database import init_db
-from .api import products, scraping, cart
+from .api import products, scraping, cart, locations
 from .services.vector_search_service import get_vector_search_service
 
 
@@ -57,6 +57,7 @@ app.add_middleware(
 app.include_router(products.router)
 app.include_router(scraping.router)
 app.include_router(cart.router)
+app.include_router(locations.router)
 
 
 @app.get("/")

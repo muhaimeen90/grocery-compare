@@ -1,9 +1,51 @@
 """
 Pydantic Schemas for Request/Response validation
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, computed_field
 from typing import Optional, List
 from datetime import datetime
+
+
+class StoreBase(BaseModel):
+    """Base store schema"""
+    name: str
+
+
+class Store(StoreBase):
+    """Store response schema"""
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+
+class LocationBase(BaseModel):
+    """Base location schema"""
+    name: str
+    address: Optional[str] = None
+    suburb: Optional[str] = None
+    state: Optional[str] = None
+    postcode: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    phone: Optional[str] = None
+    opening_hours: Optional[str] = None
+    is_active: bool = True
+
+
+class Location(LocationBase):
+    """Location response schema"""
+    id: int
+    store_id: int
+    external_store_id: Optional[str] = None
+    created_at: datetime
+    updated_at: datetime
+    store: Optional[Store] = None
+    
+    class Config:
+        from_attributes = True
 
 
 class ProductBase(BaseModel):
@@ -13,7 +55,7 @@ class ProductBase(BaseModel):
     brand: Optional[str] = None
     size: Optional[str] = None
     category: str
-    store: str
+    store_id: Optional[int] = None
     product_url: Optional[str] = None
     image_url: Optional[str] = None
 
@@ -21,15 +63,26 @@ class ProductBase(BaseModel):
 class ProductCreate(ProductBase):
     """Schema for creating a product"""
     price_numeric: Optional[float] = None
+    store_id: int  # Required for creation
 
 
 class Product(ProductBase):
     """Schema for product response"""
     id: int
+    store_id: int
     price_numeric: Optional[float] = None
     last_scraped: Optional[datetime] = None
     created_at: datetime
     updated_at: datetime
+    store_rel: Optional[Store] = None  # Include store relationship
+    
+    @computed_field
+    @property
+    def store(self) -> str:
+        """Computed field for backward compatibility - returns store name from relationship"""
+        if self.store_rel:
+            return self.store_rel.name
+        return ""
     
     class Config:
         from_attributes = True
@@ -201,3 +254,19 @@ class CompareResponse(BaseModel):
     best_deal_savings: float
     best_single_store: SingleStoreOption
     best_two_stores: TwoStoreOption
+
+
+# Location Schemas for Nearby Search
+class LocationWithDistance(Location):
+    """Location response with calculated distance"""
+    distance_km: Optional[float] = Field(None, description="Distance in kilometers from search point")
+    
+    class Config:
+        from_attributes = True
+
+
+class NearbyLocationsResponse(BaseModel):
+    """Response schema for nearby locations query"""
+    locations: List[LocationWithDistance]
+    search_point: dict = Field(..., description="The coordinates used for search (lat, lng)")
+    total: int

@@ -7,9 +7,20 @@ from sqlalchemy.orm import Session
 from typing import Dict
 import re
 
-from ..models import Product
+from ..models import Product, Store
 from ..database import SessionLocal
 from .price_parser import extract_numeric_price
+
+
+def get_store_id(store_name: str, db: Session) -> int:
+    """
+    Get store ID from store name, case-insensitive
+    """
+    from sqlalchemy import func
+    store = db.query(Store).filter(func.lower(Store.name) == func.lower(store_name)).first()
+    if not store:
+        raise ValueError(f"Store '{store_name}' not found in database")
+    return store.id
 
 
 def normalize_column_names(df: pd.DataFrame) -> pd.DataFrame:
@@ -43,7 +54,7 @@ def clean_category_name(category: str) -> str:
     Clean category name from filename
     """
     # Remove store prefix
-    category = re.sub(r'^(iga_|woolworths_|coles_)', '', category, flags=re.IGNORECASE)
+    category = re.sub(r'^(iga_|woolworths_|coles_|aldi_)', '', category, flags=re.IGNORECASE)
     
     # Replace underscores with spaces
     category = category.replace('_', ' ')
@@ -78,8 +89,10 @@ def import_csv_file(
             print(f"⚠️  Skipping {csv_path.name}: Missing required columns")
             return 0
         
-        # Add store and category
-        df['store'] = store_name
+        # Get store_id from store name
+        store_id = get_store_id(store_name, db)
+        
+        # Add category (store_id will be added per product)
         df['category'] = category_name
         
         # Filter out rows with missing prices (NaN values)
@@ -109,7 +122,7 @@ def import_csv_file(
                 brand=row['brand'] if pd.notna(row['brand']) else None,
                 size=row['size'] if pd.notna(row['size']) else None,
                 category=row['category'],
-                store=row['store'],
+                store_id=store_id,  # Use store_id instead of store string
                 product_url=row['product_url'] if pd.notna(row['product_url']) else None,
                 image_url=row['image_url'] if pd.notna(row['image_url']) else None,
             )
@@ -164,26 +177,33 @@ def migrate_all_csvs(csv_base_path: Path) -> Dict[str, int]:
     """
     Migrate all CSV files to database
     
+    Automatically discovers all store folders in the data directory.
+    
     Returns:
         Dict with store names and product counts
     """
     db = SessionLocal()
     
-    stores_config = {
-        'IGA': 'IGA',
-        'Woolworths': 'Woolworths',
-        'Coles': 'Coles'
-    }
-    
     results = {}
     
     try:
-        for folder_name, store_name in stores_config.items():
-            store_path = csv_base_path / folder_name
-            
-            if not store_path.exists():
-                print(f"⚠️  {folder_name} folder not found, skipping...")
-                continue
+        # Automatically discover all folders in the data directory
+        if not csv_base_path.exists():
+            print(f"⚠️  Data directory not found: {csv_base_path}")
+            return results
+        
+        # Get all directories (stores) in the data path
+        store_folders = [f for f in csv_base_path.iterdir() if f.is_dir()]
+        
+        if not store_folders:
+            print(f"⚠️  No store folders found in {csv_base_path}")
+            return results
+        
+        # Sort folders alphabetically for consistent output
+        store_folders.sort()
+        
+        for store_path in store_folders:
+            store_name = store_path.name  # Use folder name as store name
             
             print(f"\n📁 Importing {store_name} products...")
             count = import_store_csvs(store_path, store_name, db)

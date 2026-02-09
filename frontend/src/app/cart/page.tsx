@@ -70,8 +70,8 @@ export default function CartPage() {
     localStorage.setItem('selectedCartItems', JSON.stringify(allProductIds));
     localStorage.setItem('sessionId', sessionId);
     
-    // Navigate directly to comparison page
-    router.push('/cart/confirm');
+    // Navigate to location selection page before comparison
+    router.push(`/cart/location?session=${sessionId}`);
   };
 
   return (

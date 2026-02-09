@@ -14,6 +14,7 @@ function getStoreHeaderClass(store: string): string {
   if (storeLower === 'iga') return 'bg-red-600 text-white';
   if (storeLower === 'woolworths') return 'bg-green-600 text-white';
   if (storeLower === 'coles') return 'bg-red-700 text-white';
+  if (storeLower === 'aldi') return 'bg-blue-600 text-white';
   return 'bg-gray-600 text-white';
 }
 

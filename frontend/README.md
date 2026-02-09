@@ -8,7 +8,7 @@ Modern Next.js 14 frontend for the grocery price comparison application.
 - ⚡ Fast page loads with Next.js App Router
 - 🔍 Advanced search and filtering
 - 📊 Real-time price updates
-- 🛒 Multi-store browsing (IGA, Woolworths, Coles)
+- 🛒 Multi-store browsing (IGA, Woolworths, Coles, Aldi)
 - 📱 Mobile-first design
 
 ## Prerequisites
@@ -141,6 +141,7 @@ const result = await apiClient.scrapePrice(productId);
   - IGA: Green (#10b981)
   - Woolworths: Orange (#f59e0b)
   - Coles: Red (#ef4444)
+  - Aldi: Blue (#3b82f6)
 
 ## Development Tips
 

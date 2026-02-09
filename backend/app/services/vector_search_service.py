@@ -269,17 +269,19 @@ class VectorSearchService:
             print("⚠️  Vector index not initialized for identical product search")
             return []
         
-        STORES = ["IGA", "Woolworths", "Coles"]
+        STORES = ["IGA", "Woolworths", "Coles", "Aldi"]
         
         print(f"\n🔍 Finding identical products for product_id={product_id}...")
 
         # Fetch original product to know its store and ensure it exists
-        original_product = db.query(ProductModel).filter(ProductModel.id == product_id).first()
+        from sqlalchemy.orm import joinedload
+        original_product = db.query(ProductModel).options(joinedload(ProductModel.store_rel)).filter(ProductModel.id == product_id).first()
         if not original_product:
             print(f"⚠️  Product {product_id} not found in database")
             return []
         
-        print(f"  Original: {original_product.name[:60]} ({original_product.store})")
+        store_name = original_product.store_rel.name if original_product.store_rel else "Unknown"
+        print(f"  Original: {original_product.name[:60]} ({store_name})")
         print(f"  Size: {original_product.size}, Brand: {original_product.brand}")
 
         # Generate query vectors from product name for hybrid search
@@ -297,7 +299,7 @@ class VectorSearchService:
                 sparse_vector=sparse_vector,
                 top_k=50,
                 include_metadata=True,
-                filter={"store": {"$ne": original_product.store}},
+                filter={"store": {"$ne": store_name}},
                 alpha=0.3 
             )
         except Exception as query_error:
@@ -345,7 +347,7 @@ class VectorSearchService:
         original_data = {
             'size': original_product.size,
             'brand': original_product.brand,
-            'store': original_product.store,
+            'store': store_name,
         }
         
         ranked_matches = rank_identical_products(
@@ -382,7 +384,7 @@ class VectorSearchService:
         
         # Also check for completely missing stores
         found_stores = {m['store'] for m in ranked_matches}
-        missing_stores = [s for s in STORES if s != original_product.store and s not in found_stores]
+        missing_stores = [s for s in STORES if s != store_name and s not in found_stores]
         
         # Process stores that need fallback alternatives (non-auto-approved + missing)
         stores_needing_fallbacks = list(non_auto_approved_stores | set(missing_stores))

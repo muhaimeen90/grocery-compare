@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { useState } from 'react';
 import type { Product } from '@/lib/types';
 import { getStoreBadgeClass, getImageUrl, formatDate, cn, getOrCreateSessionId } from '@/lib/utils';
-import PriceUpdateButton from './PriceUpdateButton';
 import { ExternalLink, ShoppingCart } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 
@@ -109,12 +108,6 @@ export default function ProductCard({ product, onPriceUpdate }: ProductCardProps
             <ShoppingCart className="w-4 h-4" />
             {isAdding ? 'Adding...' : justAdded ? 'Added' : 'Add'}
           </button>
-
-          <PriceUpdateButton
-            productId={product.id}
-            onSuccess={onPriceUpdate}
-            compact={true}
-          />
           
           {product.product_url && (
             <a

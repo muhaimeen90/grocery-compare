@@ -42,22 +42,31 @@ def main():
         response = input("Do you want to clear and reimport? (yes/no): ")
         if response.lower() == 'yes':
             print("\n🗑️  Clearing existing data...")
-            Product.__table__.drop(engine)
-            init_db()
-            print("✅ Data cleared")
+            db = SessionLocal()
+            try:
+                # Delete all products (CASCADE will handle cart_items)
+                db.query(Product).delete()
+                db.commit()
+                print("✅ Data cleared")
+            except Exception as e:
+                db.rollback()
+                print(f"❌ Error clearing data: {e}")
+                return
+            finally:
+                db.close()
         else:
             print("❌ Migration cancelled")
             return
     
     # Run migration
-    print(f"\n📁 Scanning CSV files in: {settings.CSV_DIR}")
+    print(f"\n📁 Scanning CSV files in: {settings.DATA_DIR}")
     
-    if not settings.CSV_DIR.exists():
-        print(f"❌ CSV directory not found: {settings.CSV_DIR}")
+    if not settings.DATA_DIR.exists():
+        print(f"❌ CSV directory not found: {settings.DATA_DIR}")
         print("Please ensure the 'week 2' folder is in the correct location")
         return
     
-    results = migrate_all_csvs(settings.CSV_DIR)
+    results = migrate_all_csvs(settings.DATA_DIR)
     
     # Print summary
     print("\n" + "=" * 80)

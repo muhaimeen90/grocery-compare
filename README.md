@@ -1,10 +1,10 @@
 # Grocery Price Comparison Application
 
-A modern web application for comparing grocery prices across IGA, Woolworths, and Coles.
+A modern web application for comparing grocery prices across IGA, Woolworths, Coles, and Aldi.
 
 ## 🎯 Features
 
-- **Multi-Store Comparison:** Browse products from IGA, Woolworths, and Coles
+- **Multi-Store Comparison:** Browse products from IGA, Woolworths, Coles, and Aldi
 - **Live Price Scraping:** Get real-time prices directly from store websites
 - **Advanced Filtering:** Search by name, filter by brand, sort by price
 - **Modern UI:** Responsive design with Tailwind CSS
@@ -135,7 +135,7 @@ CREATE TABLE products (
     price_numeric REAL,                -- Numeric for sorting
     brand TEXT,
     category TEXT NOT NULL,
-    store TEXT NOT NULL,               -- 'IGA', 'Woolworths', 'Coles'
+    store TEXT NOT NULL,               -- 'IGA', 'Woolworths', 'Coles', 'Aldi'
     product_url TEXT,
     image_url TEXT,
     last_scraped DATETIME,             -- Last price update
@@ -265,7 +265,7 @@ This application replaces the original Streamlit app (`week 2/streamlit_app.py`)
 - ✅ Auto-updating prices (database persistence)
 
 **Feature Parity:**
-- ✅ All stores (IGA, Woolworths, Coles)
+- ✅ All stores (IGA, Woolworths, Coles, Aldi)
 - ✅ All categories
 - ✅ Search and filtering
 - ✅ Price sorting
