@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     IDENTICAL_AUTO_APPROVE_THRESHOLD: float = 0.75  # Above this = auto-approved
     IDENTICAL_MINIMUM_SCORE: float = 0.40  # Below this = no match at all
     
+    # Google Maps
+    GOOGLE_MAPS_API_KEY: str = ""
+    
+    # Travel Cost Settings
+    ATO_RATE_PER_KM: float = 0.88  # AUD per km (Australian Tax Office rate, covers fuel+wear+depreciation)
+    MYKI_2HR_FARE: float = 5.30  # AUD Melbourne myki 2-hour fare
+    MYKI_DAILY_CAP: float = 10.60  # AUD Melbourne myki daily cap
+    VALUE_OF_TIME_PER_HOUR: float = 15.00  # AUD heuristic: opportunity cost of travel time
+    
     # Paths
     BASE_DIR: Path = Path(__file__).resolve().parent.parent
     DATA_DIR: Path = BASE_DIR / "data"

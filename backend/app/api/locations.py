@@ -2,6 +2,7 @@
 API routes for store locations and proximity search
 """
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import func, and_
 from typing import List, Optional
@@ -9,7 +10,8 @@ import math
 
 from ..database import get_db
 from ..models import Location, Store
-from ..schemas import LocationWithDistance, NearbyLocationsResponse
+from ..schemas import LocationWithDistance, NearbyLocationsResponse, StoreLocationInput, TravelInfo
+from ..services.travel_cost_service import compute_all_travel_costs
 
 router = APIRouter(prefix="/api/locations", tags=["locations"])
 
@@ -189,3 +191,64 @@ async def get_location(
         },
         "distance_km": None
     }
+
+
+# ============== Travel Matrix Endpoint ==============
+
+class TravelMatrixRequest(BaseModel):
+    user_lat: float
+    user_lng: float
+    transport_mode: str = "driving"  # 'driving' or 'transit'
+    store_locations: List[StoreLocationInput]
+
+
+class StoreTravelPreview(BaseModel):
+    store_name: str
+    travel_info: TravelInfo
+
+
+class TravelMatrixResponse(BaseModel):
+    stores: List[StoreTravelPreview]
+    transport_mode: str
+
+
+@router.post("/travel-matrix", response_model=TravelMatrixResponse)
+async def get_travel_matrix(request: TravelMatrixRequest):
+    """
+    Get travel distance/duration/cost from user location to each store.
+    Used by the location page to show travel time previews.
+    """
+    user_coords = (request.user_lat, request.user_lng)
+    gm_mode = "transit" if request.transport_mode == "public" else "driving"
+    
+    store_coords_map = {
+        sl.store_name: (sl.lat, sl.lng)
+        for sl in request.store_locations
+    }
+    
+    if not store_coords_map:
+        return TravelMatrixResponse(stores=[], transport_mode=request.transport_mode)
+    
+    travel_data = compute_all_travel_costs(user_coords, store_coords_map, gm_mode)
+    
+    stores = []
+    for store_name, tr in travel_data["single_store"].items():
+        stores.append(StoreTravelPreview(
+            store_name=store_name,
+            travel_info=TravelInfo(
+                distance_km=tr.distance_km,
+                duration_min=tr.duration_min,
+                fuel_or_fare_cost=tr.fuel_or_fare_cost,
+                time_cost=tr.time_cost,
+                total_cost=tr.total_cost,
+                route_description=tr.route_description,
+                mode=tr.mode,
+            ),
+        ))
+    
+    stores.sort(key=lambda x: x.travel_info.total_cost)
+    
+    return TravelMatrixResponse(
+        stores=stores,
+        transport_mode=request.transport_mode,
+    )

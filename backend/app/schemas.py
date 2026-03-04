@@ -187,12 +187,37 @@ class CartItemWithAlternatives(Product):
     alternative_prices: List[ProductWithApproval] = Field(default_factory=list)
 
 
+# ============== Travel Cost Schemas ==============
+
+class TravelInfo(BaseModel):
+    """Travel cost breakdown for a store trip"""
+    distance_km: float = Field(description="Total route distance in km")
+    duration_min: float = Field(description="Total travel duration in minutes")
+    fuel_or_fare_cost: float = Field(description="Direct monetary cost (fuel/wear for private, fare for public)")
+    time_cost: float = Field(description="Opportunity cost of travel time")
+    total_cost: float = Field(description="fuel_or_fare_cost + time_cost")
+    route_description: str = Field(description="Human-readable route description")
+    mode: str = Field(description="Transport mode: 'driving' or 'transit'")
+
+
+class StoreLocationInput(BaseModel):
+    """Store location for travel cost calculation"""
+    store_name: str
+    lat: float
+    lng: float
+
+
 # ============== Cart Comparison Schemas ==============
 
 class CompareRequest(BaseModel):
     """Schema for cart comparison request"""
     product_ids: List[int] = Field(..., min_length=1, description="List of product IDs to compare")
     session_id: str = Field(..., min_length=1)
+    # Optional travel cost parameters
+    user_lat: Optional[float] = Field(None, description="User latitude for travel cost")
+    user_lng: Optional[float] = Field(None, description="User longitude for travel cost")
+    transport_mode: Optional[str] = Field(None, description="'private' or 'public'")
+    store_locations: Optional[List[StoreLocationInput]] = Field(None, description="Nearest store locations with coords")
 
 
 class ProductMatch(BaseModel):
@@ -216,6 +241,8 @@ class StoreComparison(BaseModel):
     total: float
     available_count: int
     missing_count: int
+    travel_info: Optional[TravelInfo] = None
+    total_with_travel: Optional[float] = None
 
 
 class BestDealItem(BaseModel):
@@ -235,6 +262,8 @@ class SingleStoreOption(BaseModel):
     total: float
     available_count: int
     missing_count: int
+    travel_info: Optional[TravelInfo] = None
+    total_with_travel: Optional[float] = None
 
 
 class TwoStoreOption(BaseModel):
@@ -244,6 +273,8 @@ class TwoStoreOption(BaseModel):
     total: float
     available_count: int
     missing_count: int
+    travel_info: Optional[TravelInfo] = None
+    total_with_travel: Optional[float] = None
 
 
 class CompareResponse(BaseModel):
@@ -254,6 +285,8 @@ class CompareResponse(BaseModel):
     best_deal_savings: float
     best_single_store: SingleStoreOption
     best_two_stores: TwoStoreOption
+    transport_mode: Optional[str] = None
+    recommendation: Optional[str] = None
 
 
 # Location Schemas for Nearby Search

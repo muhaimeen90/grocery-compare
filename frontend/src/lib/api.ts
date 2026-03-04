@@ -10,6 +10,8 @@ import type {
   CompareResponse,
   Location,
   NearbyLocationsResponse,
+  StoreLocationInput,
+  TravelMatrixResponse,
 } from './types';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
@@ -101,11 +103,27 @@ export const apiClient = {
     return data;
   },
 
-  async compareCart(productIds: number[], sessionId: string): Promise<CompareResponse> {
-    const { data } = await api.post<CompareResponse>('/api/v1/cart/compare', {
+  async compareCart(
+    productIds: number[],
+    sessionId: string,
+    travelParams?: {
+      userLat: number;
+      userLng: number;
+      transportMode: 'private' | 'public';
+      storeLocations: StoreLocationInput[];
+    }
+  ): Promise<CompareResponse> {
+    const body: Record<string, unknown> = {
       product_ids: productIds,
       session_id: sessionId,
-    });
+    };
+    if (travelParams) {
+      body.user_lat = travelParams.userLat;
+      body.user_lng = travelParams.userLng;
+      body.transport_mode = travelParams.transportMode;
+      body.store_locations = travelParams.storeLocations;
+    }
+    const { data } = await api.post<CompareResponse>('/api/v1/cart/compare', body);
     return data;
   },
 
@@ -149,6 +167,21 @@ export const apiClient = {
 
   async getLocation(locationId: number): Promise<Location> {
     const { data } = await api.get<Location>(`/api/locations/${locationId}`);
+    return data;
+  },
+
+  async getTravelMatrix(
+    userLat: number,
+    userLng: number,
+    transportMode: string,
+    storeLocations: StoreLocationInput[]
+  ): Promise<TravelMatrixResponse> {
+    const { data } = await api.post<TravelMatrixResponse>('/api/locations/travel-matrix', {
+      user_lat: userLat,
+      user_lng: userLng,
+      transport_mode: transportMode,
+      store_locations: storeLocations,
+    });
     return data;
   },
 };

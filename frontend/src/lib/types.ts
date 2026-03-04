@@ -89,6 +89,8 @@ export interface StoreComparison {
   total: number;
   available_count: number;
   missing_count: number;
+  travel_info?: TravelInfo | null;
+  total_with_travel?: number | null;
 }
 
 export interface BestDealItem {
@@ -106,6 +108,8 @@ export interface SingleStoreOption {
   total: number;
   available_count: number;
   missing_count: number;
+  travel_info?: TravelInfo | null;
+  total_with_travel?: number | null;
 }
 
 export interface TwoStoreOption {
@@ -114,6 +118,8 @@ export interface TwoStoreOption {
   total: number;
   available_count: number;
   missing_count: number;
+  travel_info?: TravelInfo | null;
+  total_with_travel?: number | null;
 }
 
 export interface CompareResponse {
@@ -123,6 +129,8 @@ export interface CompareResponse {
   best_deal_savings: number;
   best_single_store: SingleStoreOption;
   best_two_stores: TwoStoreOption;
+  transport_mode?: string | null;
+  recommendation?: string | null;
 }
 
 // Location Types
@@ -160,4 +168,31 @@ export interface NearbyLocationsResponse {
     lng: number;
   };
   total: number;
+}
+
+// Travel Cost Types
+export interface TravelInfo {
+  distance_km: number;
+  duration_min: number;
+  fuel_or_fare_cost: number;
+  time_cost: number;
+  total_cost: number;
+  route_description: string;
+  mode: string;
+}
+
+export interface StoreLocationInput {
+  store_name: string;
+  lat: number;
+  lng: number;
+}
+
+export interface StoreTravelPreview {
+  store_name: string;
+  travel_info: TravelInfo;
+}
+
+export interface TravelMatrixResponse {
+  stores: StoreTravelPreview[];
+  transport_mode: string;
 }

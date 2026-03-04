@@ -19,8 +19,10 @@ from ..schemas import (
     BestDealItem,
     SingleStoreOption,
     TwoStoreOption,
+    TravelInfo,
 )
 from ..services.vector_search_service import get_vector_search_service
+from ..services.travel_cost_service import compute_all_travel_costs, TravelCostResult
 
 router = APIRouter(prefix="/api/v1/cart", tags=["cart"])
 
@@ -354,16 +356,67 @@ def compare_cart_items(
 
     total_savings = max(0, original_total - best_deal_total)
     
-    # Calculate best single store (cheapest store with all available items)
-    best_single_store = min(store_comparisons, key=lambda x: x.total)
+    # ========== TRAVEL COST INTEGRATION ==========
+    # Build travel costs if user provided location + transport mode
+    travel_data = None  # {single_store: {name: TravelCostResult}, two_store: {(a,b): TravelCostResult}}
+    has_travel = (
+        payload.user_lat is not None
+        and payload.user_lng is not None
+        and payload.transport_mode is not None
+        and payload.store_locations is not None
+        and len(payload.store_locations) > 0
+    )
+    
+    if has_travel:
+        user_coords = (payload.user_lat, payload.user_lng)
+        gm_mode = "transit" if payload.transport_mode == "public" else "driving"
+        
+        store_coords_map = {
+            sl.store_name: (sl.lat, sl.lng)
+            for sl in payload.store_locations
+        }
+        
+        travel_data = compute_all_travel_costs(user_coords, store_coords_map, gm_mode)
+    
+    def _travel_result_to_schema(tr: TravelCostResult) -> TravelInfo:
+        return TravelInfo(
+            distance_km=tr.distance_km,
+            duration_min=tr.duration_min,
+            fuel_or_fare_cost=tr.fuel_or_fare_cost,
+            time_cost=tr.time_cost,
+            total_cost=tr.total_cost,
+            route_description=tr.route_description,
+            mode=tr.mode,
+        )
+    
+    # Attach travel info to each store comparison
+    for sc in store_comparisons:
+        if travel_data and sc.store in travel_data["single_store"]:
+            tr = travel_data["single_store"][sc.store]
+            sc.travel_info = _travel_result_to_schema(tr)
+            sc.total_with_travel = round(sc.total + tr.total_cost, 2)
+        else:
+            sc.total_with_travel = sc.total
+    
+    # Calculate best single store — use total_with_travel if available
+    best_single_store = min(store_comparisons, key=lambda x: x.total_with_travel or x.total)
+    
+    best_single_travel_info = None
+    best_single_total_with_travel = None
+    if travel_data and best_single_store.store in travel_data["single_store"]:
+        tr = travel_data["single_store"][best_single_store.store]
+        best_single_travel_info = _travel_result_to_schema(tr)
+        best_single_total_with_travel = round(best_single_store.total + tr.total_cost, 2)
     
     # Calculate best two-store combination
     # Try all pairs of stores and find the cheapest combination
     from itertools import combinations
     
     best_two_store_total = float('inf')
+    best_two_store_product_total = 0.0
     best_two_store_stores = []
     best_two_store_products = []
+    best_two_store_travel = None
     
     for store1, store2 in combinations(STORES, 2):
         two_store_products: List[ProductMatch] = []
@@ -426,19 +479,65 @@ def compare_cart_items(
                 ))
         
         # Check if this pair is better than the current best
-        if two_store_total < best_two_store_total:
-            best_two_store_total = two_store_total
+        # Use travel-adjusted total when available
+        pair_key = tuple(sorted([store1, store2]))
+        travel_cost_for_pair = 0.0
+        pair_travel_info = None
+        if travel_data:
+            for tk, tv in travel_data["two_store"].items():
+                if set(tk) == set([store1, store2]):
+                    travel_cost_for_pair = tv.total_cost
+                    pair_travel_info = tv
+                    break
+        
+        effective_total = two_store_total + travel_cost_for_pair
+        
+        if effective_total < best_two_store_total:
+            best_two_store_total = effective_total
+            best_two_store_product_total = two_store_total
             best_two_store_stores = [store1, store2]
             best_two_store_products = two_store_products
+            best_two_store_travel = pair_travel_info
     
     # Build the best two-store option
+    two_store_travel_info = None
+    two_store_total_with_travel = None
+    if best_two_store_travel:
+        two_store_travel_info = _travel_result_to_schema(best_two_store_travel)
+        two_store_total_with_travel = round(best_two_store_product_total + best_two_store_travel.total_cost, 2)
+    
     best_two_stores_option = TwoStoreOption(
         stores=best_two_store_stores,
         products=best_two_store_products,
-        total=round(best_two_store_total, 2),
+        total=round(best_two_store_product_total, 2),
         available_count=sum(1 for p in best_two_store_products if p.is_available),
         missing_count=sum(1 for p in best_two_store_products if not p.is_available),
+        travel_info=two_store_travel_info,
+        total_with_travel=two_store_total_with_travel,
     )
+    
+    # Build recommendation text
+    recommendation = None
+    if has_travel:
+        single_eff = best_single_total_with_travel or best_single_store.total
+        two_eff = two_store_total_with_travel or best_two_store_product_total
+        
+        mode_label = "public transit" if payload.transport_mode == "public" else "driving"
+        
+        if single_eff <= two_eff:
+            savings = round(two_eff - single_eff, 2)
+            recommendation = (
+                f"🏆 Shopping at {best_single_store.store} is your cheapest option "
+                f"(${single_eff:.2f} total incl. {mode_label} travel). "
+                f"You save ${savings:.2f} compared to the two-store option."
+            )
+        else:
+            savings = round(single_eff - two_eff, 2)
+            recommendation = (
+                f"🏆 Shopping at {' + '.join(best_two_store_stores)} is cheapest "
+                f"(${two_eff:.2f} total incl. {mode_label} travel). "
+                f"You save ${savings:.2f} compared to the single-store option."
+            )
     
     return CompareResponse(
         store_comparisons=store_comparisons,
@@ -451,6 +550,10 @@ def compare_cart_items(
             total=best_single_store.total,
             available_count=best_single_store.available_count,
             missing_count=best_single_store.missing_count,
+            travel_info=best_single_travel_info,
+            total_with_travel=best_single_total_with_travel,
         ),
         best_two_stores=best_two_stores_option,
+        transport_mode=payload.transport_mode if has_travel else None,
+        recommendation=recommendation,
     )
