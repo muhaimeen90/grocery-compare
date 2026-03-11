@@ -4,11 +4,13 @@ import { useCallback, useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { AlertCircle, Check, Loader2, ShoppingBag, Trash2 } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { AlertCircle, ArrowRight, Check, ExternalLink, Loader2, ShoppingBag, Trash2 } from 'lucide-react';
 
 import { apiClient } from '@/lib/api';
 import type { CartItemWithAlternatives } from '@/lib/types';
-import { cn, formatDate, getImageUrl, getOrCreateSessionId, getStoreBadgeClass } from '@/lib/utils';
+import { formatDate, getImageUrl, getOrCreateSessionId } from '@/lib/utils';
+import StoreBadge from '@/components/ui/StoreBadge';
 
 export default function CartPage() {
   const router = useRouter();
@@ -75,128 +77,133 @@ export default function CartPage() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Page header */}
       <div className="flex items-center gap-3 mb-8">
-        <div className="rounded-full bg-primary-50 p-3 text-primary-600">
-          <ShoppingBag className="w-6 h-6" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+          <ShoppingBag className="w-5 h-5" />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Your Cart</h1>
-          <p className="text-gray-600">Review items and compare their prices across other stores.</p>
+          <h1 className="text-xl font-bold text-zinc-900">Your Cart</h1>
+          <p className="text-sm text-zinc-500">Review items and compare prices across stores.</p>
         </div>
       </div>
 
       {loading && (
-        <div className="card p-8 flex items-center gap-3 text-gray-600">
-          <Loader2 className="w-5 h-5 animate-spin" />
-          <span>Loading your cart…</span>
+        <div className="card p-8 flex items-center gap-3 text-zinc-500">
+          <Loader2 className="w-4 h-4 animate-spin" />
+          <span className="text-sm">Loading your cart…</span>
         </div>
       )}
 
       {!loading && error && (
-        <div className="card p-6 flex items-start gap-3 text-red-700">
-          <AlertCircle className="w-5 h-5" />
+        <div className="card p-5 flex items-start gap-3 text-red-700 border-red-100 bg-red-50">
+          <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
           <div>
-            <p className="font-medium">{error}</p>
-            <button onClick={() => fetchCart(sessionId)} className="text-sm underline">
-              Try again
-            </button>
+            <p className="text-sm font-medium">{error}</p>
+            <button onClick={() => fetchCart(sessionId)} className="text-xs underline mt-1">Try again</button>
           </div>
         </div>
       )}
 
       {!loading && !error && !hasItems && (
-        <div className="card p-10 text-center space-y-4">
-          <ShoppingBag className="w-12 h-12 text-gray-400 mx-auto" />
-          <h2 className="text-xl font-semibold text-gray-900">Your cart is empty</h2>
-          <p className="text-gray-600">Browse products and add them to your cart to compare prices.</p>
-          <div className="flex justify-center gap-3">
-            <Link href="/" className="btn-primary">
-              Start shopping
-            </Link>
+        <div className="card p-12 text-center">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-zinc-100 mx-auto mb-4">
+            <ShoppingBag className="w-7 h-7 text-zinc-400" />
           </div>
+          <h2 className="text-base font-semibold text-zinc-900 mb-1">Your cart is empty</h2>
+          <p className="text-sm text-zinc-500 mb-6">Browse products and add them to compare prices.</p>
+          <Link href="/" className="btn-primary">
+            Start shopping
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       )}
 
       {!loading && !error && hasItems && (
-        <div className="space-y-6">
-          {/* Compare Button */}
-          <div className="card p-4 flex items-center justify-between">
-            <p className="text-sm text-gray-600">
-              Ready to compare prices? We'll show you the best deals from a single store or two stores.
-            </p>
-            <button
-              type="button"
-              onClick={handleConfirm}
-              className="btn-primary"
-            >
-              <Check className="w-4 h-4 mr-2" />
-              Compare Prices
+        <div className="space-y-4">
+          {/* Compare CTA */}
+          <div className="card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-primary-50 border-primary-100">
+            <div>
+              <p className="text-sm font-semibold text-primary-900">Ready to compare prices?</p>
+              <p className="text-xs text-primary-600 mt-0.5">We&apos;ll show you the cheapest store for your basket.</p>
+            </div>
+            <button type="button" onClick={handleConfirm} className="btn-primary flex-shrink-0">
+              <Check className="w-4 h-4" />
+              Compare prices
             </button>
           </div>
 
-          {items.map((item) => (
-            <div 
-              key={item.cart_item_id} 
+          {/* Cart items */}
+          {items.map((item, idx) => (
+            <motion.div
+              key={item.cart_item_id}
               className="card overflow-hidden"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.05 }}
             >
-              <div className="flex flex-col md:flex-row">
-                <div className="relative md:w-1/3 bg-gray-50 aspect-square">
+              <div className="flex gap-4 p-4">
+                {/* Image */}
+                <div className="relative h-20 w-20 flex-shrink-0 rounded-xl overflow-hidden bg-zinc-50">
                   <Image
                     src={getImageUrl(item.image_url)}
                     alt={item.name}
                     fill
-                    className="object-contain p-6"
+                    className="object-contain p-2"
+                    sizes="80px"
                   />
-                  <div className="absolute top-3 left-3">
-                    <span className={cn('badge', getStoreBadgeClass(item.store))}>{item.store}</span>
-                  </div>
                 </div>
 
-                <div className="flex-1 p-6">
-                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                    <div>
-                      <p className="text-sm text-gray-500 uppercase tracking-wide">{item.brand || 'Unbranded'}</p>
-                      <h3 className="text-2xl font-semibold text-gray-900">{item.name}</h3>
-                      <p className="text-sm text-gray-500">{item.category}</p>
-                      {item.size && <p className="text-sm text-gray-500">Size: {item.size}</p>}
+                {/* Info */}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      {item.brand && (
+                        <p className="text-[11px] font-semibold uppercase tracking-wider text-zinc-400 mb-0.5">{item.brand}</p>
+                      )}
+                      <h3 className="text-sm font-semibold text-zinc-900 line-clamp-2">{item.name}</h3>
+                      <div className="flex items-center gap-2 mt-1">
+                        <StoreBadge store={item.store} />
+                        {item.size && <span className="text-xs text-zinc-400">{item.size}</span>}
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-3xl font-bold text-gray-900">{item.price}</p>
-                      <p className="text-sm text-gray-500">Quantity: {item.quantity}</p>
+                    {/* Price */}
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-lg font-bold text-zinc-900">{item.price}</p>
                       {item.last_scraped && (
-                        <p className="text-xs text-gray-400">Updated {formatDate(item.last_scraped)}</p>
+                        <p className="text-[11px] text-zinc-400 mt-0.5">{formatDate(item.last_scraped)}</p>
                       )}
                     </div>
                   </div>
 
-                  {item.product_url && (
-                    <div className="mt-3">
+                  {/* Footer row */}
+                  <div className="flex items-center justify-between mt-3 pt-3 border-t border-zinc-100">
+                    {item.product_url ? (
                       <a
                         href={item.product_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm font-medium text-primary-600 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs font-medium text-primary-600 hover:underline"
                       >
-                        View on store website
+                        <ExternalLink className="w-3 h-3" />
+                        View on store
                       </a>
-                    </div>
-                  )}
+                    ) : <span />}
 
-                  <div className="mt-5 border-t pt-5 flex items-center justify-end">
                     <button
                       type="button"
                       onClick={() => handleRemove(item.id)}
                       disabled={removingId === item.id}
-                      className="inline-flex items-center gap-2 text-sm font-semibold text-red-600 hover:text-red-700 disabled:opacity-60"
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-zinc-400 hover:text-red-600 transition-colors disabled:opacity-50"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3.5 h-3.5" />
                       {removingId === item.id ? 'Removing…' : 'Remove'}
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
       )}

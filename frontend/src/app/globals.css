@@ -4,54 +4,146 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 248 250 247;       /* #f8faf7 */
+    --foreground: 9 9 11;            /* zinc-950 */
+    --border: 229 231 235;           /* #e5e7eb */
+    --ring: 34 197 94;               /* primary-500 green */
   }
-  
+
+  * {
+    @apply border-zinc-200;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
   body {
-    @apply bg-gray-50;
-    color: rgb(15 23 42);
+    font-family: var(--font-inter), system-ui, sans-serif;
+    background-color: #f8faf7;
+    color: #1f2933;
+    letter-spacing: -0.01em;
   }
+
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-zinc-300 rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-zinc-400; }
 }
 
 @layer components {
+  /* ── Buttons ──────────────────────────────────────────────── */
   .btn-primary {
-    @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors duration-200 font-medium;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary-600 px-4 py-2 text-sm font-semibold text-white
+           transition-all duration-150 hover:bg-primary-500 active:scale-[0.98]
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
   }
-  
+
   .btn-secondary {
-    @apply bg-gray-200 text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors duration-200 font-medium;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-white border border-zinc-200 px-4 py-2 text-sm font-medium text-zinc-700
+           transition-all duration-150 hover:bg-zinc-50 hover:border-zinc-300 active:scale-[0.98]
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2
+           disabled:opacity-50 disabled:cursor-not-allowed shadow-sm;
   }
-  
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-zinc-600
+           transition-all duration-150 hover:bg-zinc-100 hover:text-zinc-900 active:scale-[0.98]
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500;
+  }
+
+  /* ── Cards ────────────────────────────────────────────────── */
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden;
+    @apply bg-white rounded-2xl border border-zinc-200/80 overflow-hidden shadow-card;
   }
-  
+
   .card-hover {
-    @apply transition-all duration-200 hover:shadow-md hover:-translate-y-1;
+    @apply transition-all duration-200 hover:shadow-card-hover hover:-translate-y-0.5;
   }
-  
+
+  /* ── Inputs ───────────────────────────────────────────────── */
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all;
+    @apply w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400
+           transition-colors focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20;
   }
-  
+
+  /* ── Badges ───────────────────────────────────────────────── */
   .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+    @apply inline-flex items-center rounded-md px-2 py-0.5 text-xs font-semibold tracking-wide;
   }
-  
+
   .badge-iga {
-    @apply bg-green-100 text-green-800;
+    background-color: #fef2f2;
+    color: #991b1b;
   }
-  
+
   .badge-woolworths {
-    @apply bg-orange-100 text-orange-800;
+    background-color: #f0fdf4;
+    color: #15803d;
   }
-  
+
   .badge-coles {
-    @apply bg-red-100 text-red-800;
+    background-color: #fef2f2;
+    color: #b91c1c;
   }
-  
+
   .badge-aldi {
-    @apply bg-blue-100 text-blue-800;
+    background-color: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  /* ── Skeleton shimmer ─────────────────────────────────────── */
+  .skeleton {
+    @apply rounded-lg bg-zinc-100;
+    background-image: linear-gradient(
+      90deg,
+      #f4f4f5 0px,
+      #e8e8ec 80px,
+      #f4f4f5 160px
+    );
+    background-size: 800px 100%;
+    animation: shimmer 1.4s ease-in-out infinite;
+  }
+
+  /* ── Section headings ─────────────────────────────────────── */
+  .section-label {
+    @apply text-xs font-semibold uppercase tracking-widest text-zinc-400;
+  }
+
+  /* ── Divider line ─────────────────────────────────────────── */
+  .divider {
+    @apply h-px bg-zinc-100;
+  }
+
+  /* ── Focus ring ───────────────────────────────────────────── */
+  .ring-focus {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2;
+  }
+}
+
+@layer utilities {
+  /* Hide scrollbar but allow scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Ensure the canvas injected by webgl-fluid-enhanced fills its container */
+  .fluid-container > canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
   }
 }

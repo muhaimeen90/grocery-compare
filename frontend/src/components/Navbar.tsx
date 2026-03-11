@@ -1,109 +1,114 @@
 'use client';
 
 import Link from 'next/link';
-import { ShoppingCart, Search, ShoppingBag } from 'lucide-react';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { ShoppingBag } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
+
+const stores = ['IGA', 'Woolworths', 'Coles', 'Aldi'];
+
+const storeAccent: Record<string, string> = {
+  IGA: 'hover:text-rose-600',
+  Woolworths: 'hover:text-green-600',
+  Coles: 'hover:text-red-600',
+  Aldi: 'hover:text-blue-600',
+};
 
 export default function Navbar() {
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const router = useRouter();
+  const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
 
-  const stores = ['IGA', 'Woolworths', 'Coles', 'Aldi'];
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      // Global search - redirect to first store with search param
-      router.push(`/store/${stores[0]}/all?search=${encodeURIComponent(searchQuery)}`);
-    }
-  };
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   return (
-    <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2 group">
-            <ShoppingCart className="w-8 h-8 text-primary-600 group-hover:scale-110 transition-transform" />
-            <span className="text-xl font-bold text-gray-900">
-              Grocery<span className="text-primary-600">Compare</span>
-            </span>
-          </Link>
+    <>
+      <nav
+        className={cn(
+          'sticky top-0 z-40 w-full transition-all duration-200',
+          scrolled
+            ? 'bg-white/95 backdrop-blur-md border-b border-[#e5e7eb] shadow-soft'
+            : 'bg-white border-b border-[#e5e7eb]'
+        )}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 gap-6">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#22c55e] text-white shadow-sm group-hover:bg-[#16a34a] transition-colors">
+                <ShoppingBag className="w-5 h-5" />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="text-2xl font-bold text-zinc-900 tracking-tight">
+                  Deals <span className="text-primary-600">by Sysnolodge</span>
+                </span>
+            
+              </div>
+            </Link>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+            {/* Desktop nav links */}
+            <div className="hidden md:flex items-center gap-1">
+              {stores.map((store) => {
+                const active = pathname.startsWith(`/store/${store}`);
+                return (
+                  <Link
+                    key={store}
+                    href={`/store/${store}`}
+                    className={cn(
+                      'px-3 py-1.5 rounded-md text-sm font-medium transition-colors',
+                      active
+                        ? 'bg-zinc-100 text-zinc-900'
+                        : `text-zinc-500 hover:bg-zinc-50 hover:text-zinc-900 ${storeAccent[store]}`,
+                    )}
+                  >
+                    {store}
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Right actions */}
+            <div className="flex items-center gap-2">
+              <Link
+                href="/cart"
+                className={cn(
+                  'btn-secondary h-8 px-3 text-xs',
+                  pathname === '/cart' && 'bg-zinc-100 border-zinc-300'
+                )}
+              >
+                <ShoppingBag className="w-3.5 h-3.5" />
+                Cart
+              </Link>
+            </div>
+          </div>
+
+  
+
+          {/* Mobile store nav */}
+          <div className="md:hidden pb-2 flex gap-1 overflow-x-auto no-scrollbar">
             {stores.map((store) => (
               <Link
                 key={store}
                 href={`/store/${store}`}
-                className="text-gray-700 hover:text-primary-600 font-medium transition-colors"
+                className={cn(
+                  'px-3 py-1 rounded-md text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0',
+                  pathname.startsWith(`/store/${store}`)
+                    ? 'bg-zinc-100 text-zinc-900'
+                    : 'text-zinc-500 hover:text-zinc-700 hover:bg-zinc-50'
+                )}
               >
                 {store}
               </Link>
             ))}
-
-            <Link
-              href="/cart"
-              className="inline-flex items-center gap-1 rounded-full border border-primary-100 px-4 py-2 text-sm font-semibold text-primary-700 hover:bg-primary-50"
-            >
-              <ShoppingBag className="w-4 h-4" />
-              Cart
-            </Link>
-          </div>
-
-          {/* Search */}
-          <div className="flex items-center">
-            {!searchOpen && (
-              <button
-                onClick={() => setSearchOpen(true)}
-                className="p-2 text-gray-600 hover:text-primary-600 transition-colors"
-                aria-label="Search"
-              >
-                <Search className="w-5 h-5" />
-              </button>
-            )}
-            
-            {searchOpen && (
-              <form onSubmit={handleSearch} className="flex items-center">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search products..."
-                  className="input w-64"
-                  autoFocus
-                  onBlur={() => {
-                    if (!searchQuery) setSearchOpen(false);
-                  }}
-                />
-              </form>
-            )}
           </div>
         </div>
+      </nav>
 
-        {/* Mobile Navigation */}
-        <div className="md:hidden pb-4 flex space-x-4 overflow-x-auto">
-          {stores.map((store) => (
-            <Link
-              key={store}
-              href={`/store/${store}`}
-              className="text-sm text-gray-700 hover:text-primary-600 font-medium whitespace-nowrap"
-            >
-              {store}
-            </Link>
-          ))}
-
-          <Link
-            href="/cart"
-            className="flex items-center gap-1 text-sm text-primary-700 font-semibold whitespace-nowrap"
-          >
-            <ShoppingBag className="w-4 h-4" />
-            Cart
-          </Link>
-        </div>
-      </div>
-    </nav>
+    </>
   );
 }
+

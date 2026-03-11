@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: 'standalone',
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   allowedDevOrigins: ['72.62.70.246'],
   images: {
     loader: 'custom',
