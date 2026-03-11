@@ -7983,3 +7983,9 @@ Error: Failed to find Server Action "x". This request might be from an older or 
     at AsyncLocalStorage.run (node:async_hooks:338:14)
     at Object.wrap (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:13:16935)
     at ni (/home/ubuntu/projects/grocery-compare/frontend/.next/standalone/node_modules/next/dist/compiled/next-server/app-page.runtime.prod.js:20:543)
+  ▲ Next.js 14.2.35
+  - Local:        http://localhost:3000
+  - Network:      http://0.0.0.0:3000
+
+ ✓ Starting...
+ ✓ Ready in 109ms

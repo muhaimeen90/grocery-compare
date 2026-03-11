@@ -3,20 +3,31 @@
 import { useState, useEffect, useCallback, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Navigation, MapPin, Loader2, AlertCircle, Car, Bus, Clock, DollarSign } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Navigation, MapPin, Loader2, AlertCircle, Car, Bus, Clock, DollarSign, ChevronRight } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import type { Location, StoreTravelPreview } from '@/lib/types';
 
 const LocationMap = dynamic(() => import('@/components/LocationMap'), {
   ssr: false,
   loading: () => (
-    <div className="flex items-center justify-center h-[400px] bg-gray-100 rounded-lg">
-      <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+    <div className="flex items-center justify-center h-[400px] bg-zinc-50 rounded-2xl border border-zinc-200/80">
+      <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
     </div>
   ),
 });
 
 const MELBOURNE_CENTER = { lat: -37.8136, lng: 144.9631 };
+
+// Fade-in animation variants
+const fadeUp = {
+  hidden: { opacity: 0, y: 16 },
+  visible: (i: number) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.08, duration: 0.35, ease: 'easeOut' },
+  }),
+};
 
 function LocationPageContent() {
   const router = useRouter();
@@ -32,14 +43,12 @@ function LocationPageContent() {
   const [locationMethod, setLocationMethod] = useState<'gps' | 'map' | null>(null);
   const [travelPreviews, setTravelPreviews] = useState<StoreTravelPreview[]>([]);
 
-  // Fetch nearby stores when user location changes
   useEffect(() => {
     if (userLocation) {
       fetchNearbyStores(userLocation.lat, userLocation.lng);
     }
   }, [userLocation]);
 
-  // Fetch travel estimates when stores or transport mode changes
   const fetchTravelPreviews = useCallback(async () => {
     if (!userLocation || nearbyStores.length === 0) return;
 
@@ -156,7 +165,6 @@ function LocationPageContent() {
       return;
     }
 
-    // Save travel context for the confirm page
     const storeLocations = nearbyStores
       .filter((s) => s.latitude && s.longitude)
       .map((s) => ({
@@ -184,54 +192,79 @@ function LocationPageContent() {
       Woolworths: 'bg-green-600',
       IGA: 'bg-red-700',
     };
-    return colors[storeName] || 'bg-gray-600';
+    return colors[storeName] || 'bg-zinc-600';
   };
 
   const getTravelPreview = (storeName: string): StoreTravelPreview | undefined =>
     travelPreviews.find((tp) => tp.store_name === storeName);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="mb-8">
+    <div className="min-h-screen bg-[#f8faf7]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+
+        {/* Header with step indicator */}
+        <motion.div
+          className="mb-8"
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3 }}
+        >
           <button
             onClick={() => router.back()}
-            className="text-blue-600 hover:text-blue-800 mb-4 flex items-center gap-2"
+            className="text-primary-600 hover:text-primary-700 mb-4 flex items-center gap-1.5 text-sm font-medium transition-colors"
           >
             ← Back to Cart
           </button>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Location & Transport</h1>
-          <p className="text-gray-600">
-            Set your location and choose how you'll travel — we'll factor travel costs into your comparison
+
+          {/* Step indicator */}
+          <div className="flex items-center gap-3 mb-5">
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-600 text-white text-xs font-bold">1</div>
+              <span className="text-sm font-semibold text-zinc-900">Location & Transport</span>
+            </div>
+            <ChevronRight className="w-4 h-4 text-zinc-300" />
+            <div className="flex items-center gap-2">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-zinc-200 text-zinc-500 text-xs font-bold">2</div>
+              <span className="text-sm font-medium text-zinc-400">Compare Prices</span>
+            </div>
+          </div>
+
+          <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 mb-2">Location & Transport</h1>
+          <p className="text-sm text-zinc-500">
+            Set your location and choose how you&apos;ll travel — we&apos;ll factor travel costs into your comparison.
           </p>
-        </div>
+        </motion.div>
 
         {/* Transport Mode Selector */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">How will you travel?</h2>
-          <div className="grid grid-cols-2 gap-4">
+        <motion.div
+          className="card p-5 sm:p-6 mb-5"
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          custom={0}
+        >
+          <h2 className="text-base font-bold text-zinc-900 mb-4">How will you travel?</h2>
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
             <button
               onClick={() => setTransportMode('private')}
-              className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${
-                transportMode === 'private'
-                  ? 'border-blue-600 bg-blue-50 shadow-md'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 ${transportMode === 'private'
+                  ? 'border-primary-500 bg-primary-50 shadow-md ring-2 ring-primary-500/20'
+                  : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                }`}
             >
-              <Car className={`w-10 h-10 ${transportMode === 'private' ? 'text-blue-600' : 'text-gray-400'}`} />
+              <Car className={`w-8 h-8 sm:w-10 sm:h-10 ${transportMode === 'private' ? 'text-primary-600' : 'text-zinc-400'}`} />
               <div className="text-center">
-                <p className={`font-bold text-lg ${transportMode === 'private' ? 'text-blue-600' : 'text-gray-700'}`}>
+                <p className={`font-bold text-sm sm:text-base ${transportMode === 'private' ? 'text-primary-700' : 'text-zinc-700'}`}>
                   Private (Driving)
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[11px] text-zinc-400 mt-1">
                   ATO rate $0.88/km + time cost
                 </p>
               </div>
               {transportMode === 'private' && (
-                <div className="w-6 h-6 bg-blue-600 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="w-5 h-5 bg-primary-600 rounded-full flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
               )}
@@ -239,55 +272,60 @@ function LocationPageContent() {
 
             <button
               onClick={() => setTransportMode('public')}
-              className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${
-                transportMode === 'public'
-                  ? 'border-green-600 bg-green-50 shadow-md'
-                  : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-              }`}
+              className={`flex flex-col items-center gap-2.5 p-4 sm:p-5 rounded-xl border-2 transition-all duration-200 ${transportMode === 'public'
+                  ? 'border-primary-500 bg-primary-50 shadow-md ring-2 ring-primary-500/20'
+                  : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                }`}
             >
-              <Bus className={`w-10 h-10 ${transportMode === 'public' ? 'text-green-600' : 'text-gray-400'}`} />
+              <Bus className={`w-8 h-8 sm:w-10 sm:h-10 ${transportMode === 'public' ? 'text-primary-600' : 'text-zinc-400'}`} />
               <div className="text-center">
-                <p className={`font-bold text-lg ${transportMode === 'public' ? 'text-green-600' : 'text-gray-700'}`}>
+                <p className={`font-bold text-sm sm:text-base ${transportMode === 'public' ? 'text-primary-700' : 'text-zinc-700'}`}>
                   Public Transit
                 </p>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-[11px] text-zinc-400 mt-1">
                   Myki fare $5.30/2hr + time cost
                 </p>
               </div>
               {transportMode === 'public' && (
-                <div className="w-6 h-6 bg-green-600 rounded-full flex items-center justify-center">
-                  <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <div className="w-5 h-5 bg-primary-600 rounded-full flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                   </svg>
                 </div>
               )}
             </button>
           </div>
-        </div>
+        </motion.div>
 
         {/* Location Input Methods */}
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-4">Set Your Location</h2>
-          <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <motion.div
+          className="card p-5 sm:p-6 mb-5"
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          custom={1}
+        >
+          <h2 className="text-base font-bold text-zinc-900 mb-4">Set Your Location</h2>
+          <div className="flex flex-col sm:flex-row gap-3 mb-5">
             <button
               onClick={handleUseMyLocation}
               disabled={loading}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+              className="flex-1 btn-primary h-11 text-sm"
             >
               {loading && locationMethod === 'gps' ? (
                 <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Getting Location...
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Getting Location…
                 </>
               ) : (
                 <>
-                  <Navigation className="h-5 w-5" />
+                  <Navigation className="h-4 w-4" />
                   Use My Location
                 </>
               )}
             </button>
-            <div className="flex-1 flex items-center justify-center text-gray-500">
-              <span className="px-4">or</span>
+            <div className="flex items-center justify-center text-zinc-400 text-xs font-medium">
+              <span>or</span>
             </div>
             <button
               onClick={() => {
@@ -296,87 +334,95 @@ function LocationPageContent() {
                   setUserLocation(MELBOURNE_CENTER);
                 }
               }}
-              className="flex-1 flex items-center justify-center gap-2 px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="flex-1 btn-secondary h-11 text-sm"
             >
-              <MapPin className="h-5 w-5" />
+              <MapPin className="h-4 w-4" />
               Click Map to Set Location
             </button>
           </div>
 
           {error && (
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg flex items-start gap-3">
-              <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
-              <p className="text-yellow-800 text-sm whitespace-pre-line">{error}</p>
+            <div className="mb-4 p-3.5 bg-amber-50 border border-amber-200/80 rounded-xl flex items-start gap-2.5">
+              <AlertCircle className="h-4 w-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <p className="text-amber-800 text-sm leading-relaxed">{error}</p>
             </div>
           )}
 
-          <div className="mb-4">
+          <div className="mb-3 rounded-xl overflow-hidden border border-zinc-200/80">
             <LocationMap
               userLocation={userLocation}
               nearbyLocations={nearbyStores}
               onLocationSelect={handleMapClick}
-              onStoreSelect={() => {}}
-              height="500px"
+              onStoreSelect={() => { }}
+              height="450px"
               allowPinning={true}
             />
           </div>
 
           {userLocation && (
-            <p className="text-sm text-gray-600 text-center">
-              📍 Your location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
-              {locationMethod === 'map' && ' (Click map to change)'}
+            <p className="text-xs text-zinc-400 text-center flex items-center justify-center gap-1.5">
+              <MapPin className="w-3 h-3" />
+              Your location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+              {locationMethod === 'map' && <span className="text-zinc-300">— Click map to change</span>}
             </p>
           )}
-        </div>
+        </motion.div>
 
         {/* Nearest Stores with Travel Info */}
         {nearbyStores.length > 0 && (
-          <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">
-              Nearest Stores
-              {(loading || travelLoading) && <Loader2 className="inline h-5 w-5 animate-spin ml-2" />}
-            </h2>
-            <div className="grid gap-4">
+          <motion.div
+            className="card p-5 sm:p-6 mb-5"
+            variants={fadeUp}
+            initial="hidden"
+            animate="visible"
+            custom={2}
+          >
+            <div className="flex items-center gap-2 mb-4">
+              <h2 className="text-base font-bold text-zinc-900">Nearest Stores</h2>
+              {(loading || travelLoading) && <Loader2 className="h-4 w-4 animate-spin text-primary-500" />}
+            </div>
+            <div className="grid gap-3">
               {nearbyStores.map((store) => {
                 const preview = getTravelPreview(store.store.name);
                 return (
                   <div
                     key={store.id}
-                    className="p-4 border-2 border-gray-200 rounded-lg bg-white transition-all hover:bg-gray-50"
+                    className="p-4 border border-zinc-200/80 rounded-xl bg-white transition-all hover:bg-zinc-50/80 hover:shadow-sm"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1.5">
                           <span
-                            className={`px-3 py-1 text-white text-sm font-bold rounded ${getStoreBadgeColor(store.store.name)}`}
+                            className={`px-2.5 py-0.5 text-white text-[11px] font-bold rounded-md tracking-wide ${getStoreBadgeColor(store.store.name)}`}
                           >
                             {store.store.name.toUpperCase()}
                           </span>
                           {store.distance_km && (
-                            <span className="text-sm text-gray-600">
-                              📍 {store.distance_km.toFixed(1)} km away
+                            <span className="text-[11px] text-zinc-400 flex items-center gap-1">
+                              <MapPin className="w-3 h-3" />
+                              {store.distance_km.toFixed(1)} km
                             </span>
                           )}
                         </div>
-                        <h3 className="font-semibold text-gray-900 mb-1">{store.name}</h3>
-                        <p className="text-sm text-gray-600 mb-1">{store.address}</p>
-                        <p className="text-sm text-gray-500">
+                        <h3 className="font-semibold text-sm text-zinc-900 mb-0.5">{store.name}</h3>
+                        <p className="text-xs text-zinc-500">{store.address}</p>
+                        <p className="text-xs text-zinc-400">
                           {store.suburb}, {store.state} {store.postcode}
                         </p>
                       </div>
 
                       {/* Travel info badge */}
                       {preview && (
-                        <div className="ml-4 flex flex-col items-end gap-1 flex-shrink-0">
-                          <div className="flex items-center gap-1 text-sm font-medium text-gray-700 bg-gray-100 px-3 py-1.5 rounded-lg">
-                            <Clock className="w-4 h-4 text-gray-500" />
+                        <div className="ml-3 flex flex-col items-end gap-1.5 flex-shrink-0">
+                          <div className="flex items-center gap-1 text-xs font-medium text-zinc-600 bg-zinc-100 px-2.5 py-1 rounded-lg">
+                            <Clock className="w-3.5 h-3.5 text-zinc-400" />
                             <span>~{Math.round(preview.travel_info.duration_min)} min</span>
                           </div>
-                          <div className="flex items-center gap-1 text-sm font-semibold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-lg">
-                            <DollarSign className="w-4 h-4" />
+                          <div className="flex items-center gap-1 text-xs font-semibold text-primary-700 bg-primary-50 px-2.5 py-1 rounded-lg">
+                            <DollarSign className="w-3.5 h-3.5" />
                             <span>${preview.travel_info.total_cost.toFixed(2)} round trip</span>
                           </div>
-                          <p className="text-xs text-gray-400 text-right">
+                          <p className="text-[10px] text-zinc-400 text-right">
                             ${preview.travel_info.fuel_or_fare_cost.toFixed(2)} {transportMode === 'private' ? 'fuel/wear' : 'fare'} + ${preview.travel_info.time_cost.toFixed(2)} time
                           </p>
                         </div>
@@ -386,22 +432,26 @@ function LocationPageContent() {
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         )}
 
         {/* Continue Button */}
-        <div className="flex justify-end">
+        <motion.div
+          className="flex justify-end"
+          variants={fadeUp}
+          initial="hidden"
+          animate="visible"
+          custom={3}
+        >
           <button
             onClick={handleContinue}
             disabled={!userLocation || nearbyStores.length === 0}
-            className="px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-semibold flex items-center gap-2"
+            className="btn-primary h-11 px-6 text-sm"
           >
             Compare Prices with Travel Costs
-            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
+            <ChevronRight className="w-4 h-4" />
           </button>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
@@ -411,8 +461,8 @@ export default function LocationPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex items-center justify-center min-h-screen">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+        <div className="flex items-center justify-center min-h-screen bg-[#f8faf7]">
+          <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
         </div>
       }
     >
